@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+    <rosparam file="$(find armcontrolmoveit)/config/door_config.yaml" command="load"/>
+
+    <node pkg="armcontrolmoveit" type="door_services" name="door_services_SJG" output="screen"/>
+</launch>

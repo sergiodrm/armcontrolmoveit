@@ -1,0 +1,6 @@
+float32 distance
+uint8 axis
+uint8 repetitions
+uint8 type
+---
+bool response

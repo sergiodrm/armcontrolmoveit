@@ -1,0 +1,6 @@
+door:
+  ejepuerta:
+    x: -0.5
+    y: 0.4
+    z: 0.7
+  giro: 0 # radianes

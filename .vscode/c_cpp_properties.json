@@ -1,0 +1,34 @@
+{
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "",
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "includePath": [
+                "/home/sergio/catkin_ws/devel/include/**",
+                "/opt/ros/kinetic/include/**",
+                "/home/sergio/catkin_ws/src/armcontrolmoveit/include/**",
+                "/home/sergio/catkin_ws/src/eband_local_planner/include/**",
+                "/home/sergio/catkin_ws/src/imu_manager/include/**",
+                "/home/sergio/catkin_ws/src/moveit_trayectorias/include/**",
+                "/home/sergio/catkin_ws/src/rcomponent/include/**",
+                "/home/sergio/catkin_ws/src/robot_localization_utils/include/**",
+                "/home/sergio/catkin_ws/src/sick_s300_laser/include/**",
+                "/home/sergio/catkin_ws/src/summit_xl_robot/summit_x_controller/include/**",
+                "/home/sergio/catkin_ws/src/summit_xl_robot/summit_xl_controller/include/**",
+                "/home/sergio/catkin_ws/src/turtlebot3/turtlebot3_slam/include/**",
+                "/home/sergio/catkin_ws/src/universal_robot/ur_kinematics/include/**",
+                "/home/sergio/catkin_ws/src/ur_modern_driver/include/**",
+                "/usr/include/**",
+                "${workspaceFolder}/include"
+            ],
+            "name": "ROS",
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}

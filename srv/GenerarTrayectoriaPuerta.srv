@@ -1,0 +1,8 @@
+# GenerarTrayectoriaPuerta.srv
+# · sistema: 0 -> puerta; 1 -> picaporte
+# · angulo en radianes
+float32 angulo
+uint8 np
+int32 sistema
+---
+geometry_msgs/Pose[] wp

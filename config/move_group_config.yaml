@@ -1,0 +1,10 @@
+move_group_config:
+  planning_group: "arm"
+config_arm:
+  home:
+    x: 0.5
+    y: 0
+    z: 0.4
+    roll: 0
+    pitch: 0
+    yaw: 0

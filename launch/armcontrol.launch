@@ -1,0 +1,5 @@
+<launch>
+    <rosparam file="$(find armcontrolmoveit)/config/move_group_config.yaml" command="load"/>
+
+    <node pkg="armcontrolmoveit" type="arm_services" name="arm_services_SJG" output="screen"/>
+</launch>

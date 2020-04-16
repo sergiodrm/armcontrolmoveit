@@ -1,0 +1,3 @@
+# PosicionApoyo.srv
+---
+geometry_msgs/Pose pose

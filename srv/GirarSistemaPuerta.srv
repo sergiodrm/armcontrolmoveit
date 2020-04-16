@@ -1,0 +1,7 @@
+# GirarSistemaPuerta.srv
+# · sistema: 0 -> puerta; 1 -> picaporte
+# · angulo en radianes
+float32 angulo
+int32 sistema
+---
+bool success
