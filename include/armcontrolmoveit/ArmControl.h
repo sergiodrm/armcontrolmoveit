@@ -13,7 +13,12 @@ Fecha: Marzo 2020
 #include <ros/ros.h>
 #include <math.h>
 #include <string.h>
+#include <Eigen/Geometry>
 #include <moveit/move_group_interface/move_group_interface.h>
+#include <moveit/robot_model/robot_model.h>
+#include <moveit/robot_model_loader/robot_model_loader.h>
+#include <moveit/robot_state/robot_state.h>
+#include <armcontrolmoveit/PoseArrayStamped.h>
 #include <armcontrolmoveit/ChangeTarget.h>
 #include <armcontrolmoveit/ExecuteTarget.h>
 #include <armcontrolmoveit/DemoPrecision.h>
@@ -22,6 +27,7 @@ Fecha: Marzo 2020
 #include <geometry_msgs/Pose.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <armcontrolmoveit/VisualTools.h>
+
 
 enum axis_enum {X, Y, Z, BD, BI, AD, AI};
 enum type {articular, cartesian};
@@ -45,6 +51,9 @@ public:
     const float set_trajectory(const std::vector<geometry_msgs::Pose> &wp, float eef_step, float jump_threshold);
     void updateHome();
     void execute();
+    void publishCartesianStates(const sensor_msgs::JointState &joint_msg);
+    void publishCartesianPlanTrajectory();
+    void publishJointPlanTrajectory();
 
     /*
     * Services callbacks
@@ -63,6 +72,11 @@ public:
 private:
     ros::NodeHandle nh;
     ros::Rate *ptr_rate;
+    ros::Publisher pub_cartesian_plan;
+    ros::Publisher pub_joint_plan;
+    ros::Publisher pub_cartesian_states;
+    std::pair<robot_model::RobotModelPtr, robot_state::RobotState*> kinematic_plan;
+    std::pair<robot_model::RobotModelPtr, robot_state::RobotState*> kinematic_joint;
     std::string planning_group;
     geometry_msgs::Pose home;
     moveit::planning_interface::MoveGroupInterface *ptr_move_group;

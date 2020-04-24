@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- Declarar argumentos -->
+    <arg name="outputscreen" default="true"/>
+    <!-- Cargar parametros desde yaml -->
+    <rosparam file="$(find armcontrolmoveit)/config/move_group_config.yaml" command="load"/>
+    <!-- Ejecutar nodo -->
+    <node if="$(arg outputscreen)" pkg="armcontrolmoveit" type="arm_services" name="arm_services_SJG" output="screen"/>
+    <node unless="$(arg outputscreen)" pkg="armcontrolmoveit" type="arm_services" name="arm_services_SJG"/>
+</launch>

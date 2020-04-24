@@ -153,8 +153,10 @@ bool Door::generarTrayectoria(armcontrolmoveit::GenerarTrayectoriaPuertaRequest 
             Affine3d apoyo, tfpuerta2apoyo;
             tfpuerta2apoyo = Translation3d(Vector3d(this->width_door, 0, 0))*AngleAxisd(M_PI_2, Vector3d::UnitZ())*
                     AngleAxisd(M_PI_2, Vector3d::UnitY())*AngleAxisd(M_PI_2, Vector3d::UnitZ())*
-                    Translation3d(Vector3d(0, 0, -this->depth_latch))*Translation3d(Vector3d(this->width_latch, 0, 0));
-            for (int punto = 0; punto < (int)req.np; punto++)
+                    Translation3d(Vector3d(0, 0, -this->depth_latch))*
+                    AngleAxisd(this->angulo_actual.at(sistemas::EJEPICAPORTE2), Vector3d::UnitZ())*
+                    Translation3d(Vector3d(this->width_latch, 0, 0));
+            for (int punto = 0; punto <= (int)req.np; punto++)
             {
                 apoyo = this->puerta.at(sistemas::EJEPUERTA)*AngleAxisd(req.angulo*punto/req.np, Vector3d::UnitZ())*tfpuerta2apoyo;
                 this->transform2pose(apoyo, p);
@@ -168,7 +170,7 @@ bool Door::generarTrayectoria(armcontrolmoveit::GenerarTrayectoriaPuertaRequest 
             geometry_msgs::Pose p;
             Affine3d apoyo;
             std::cout << "N" << req.np << std::endl;
-            for (int punto = 0; punto < req.np; punto++)
+            for (int punto = 0; punto <= req.np; punto++)
             {
                 std::cout << "N: " <<punto << "/"<<  req.np << std::endl;
                 apoyo = this->puerta.at(sistemas::EJEPICAPORTE2)*

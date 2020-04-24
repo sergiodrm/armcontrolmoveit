@@ -1,8 +1,12 @@
+# ChanteTarget.srv
+# Localizacion de la posicion deseada
+# angles_mode -> 0: radianes, 1: grados
 float32 x
 float32 y
 float32 z
 float32 roll
 float32 pitch
 float32 yaw
+int8 angles_mode
 ---
 bool success

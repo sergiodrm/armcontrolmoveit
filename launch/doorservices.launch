@@ -1,6 +1,10 @@
 <?xml version="1.0"?>
 <launch>
+    <!-- Declarar argumentos -->
+    <arg name="outputscreen" default="true"/>
+    <!-- Cargar parametros desde fichero yaml -->
     <rosparam file="$(find armcontrolmoveit)/config/door_config.yaml" command="load"/>
-
-    <node pkg="armcontrolmoveit" type="door_services" name="door_services_SJG" output="screen"/>
+    <!-- Ejecutar nodo -->
+    <node if="$(arg outputscreen)" pkg="armcontrolmoveit" type="door_services" name="door_services_SJG" output="screen"/>
+    <node unless="$(arg outputscreen)" pkg="armcontrolmoveit" type="door_services" name="door_services_SJG"/>
 </launch>

@@ -69,6 +69,7 @@ int main(int argc, char** argv)
             changeTarget.request.roll = roll*180/M_PI;
             changeTarget.request.pitch = pitch*180/M_PI;
             changeTarget.request.yaw = yaw*180/M_PI;
+            changeTarget.request.angles_mode = 1;
             
 
             if (srv_changeTarget.call(changeTarget))

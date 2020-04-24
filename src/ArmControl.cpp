@@ -41,6 +41,19 @@ ArmControl::ArmControl()
     this->home.orientation.z = q.getZ();
     this->home.orientation.w = q.getW();
     this->vstool = new VisualTools(this->ptr_move_group->getPlanningFrame());
+
+    this->pub_cartesian_plan = nh.advertise<armcontrolmoveit::PoseArrayStamped>("trajectory/cartesian_plan", 1000);
+    ROS_INFO("Publicando datos de planificacion en coordenadas cartesianas en /trajectory/cartesian_plan");
+    this->pub_joint_plan = nh.advertise<trajectory_msgs::JointTrajectory>("trajectory/joint_plan", 1000);
+    ROS_INFO("Publicando datos de planificacion en coordenadas articulares en /trajectory/joint_plan");
+    this->pub_cartesian_states = nh.advertise<geometry_msgs::PoseStamped>("arm/cartesian_states", 1000);
+    ROS_INFO("Publicando datos de /joint_states en coordenadas cartesianas en /arm/cartesian_states");
+
+    robot_model_loader::RobotModelLoader robot_loader("robot_description");
+    this->kinematic_plan.first = robot_loader.getModel();
+    this->kinematic_plan.second = new robot_state::RobotState(this->kinematic_plan.first);
+    this->kinematic_joint.first = robot_loader.getModel();
+    this->kinematic_joint.second = new robot_state::RobotState(this->kinematic_joint.first);
 }
 
 ArmControl::~ArmControl(){
@@ -101,7 +114,84 @@ void ArmControl::updateHome()
 
 void ArmControl::execute()
 {
+    this->publishJointPlanTrajectory();
+    this->publishCartesianPlanTrajectory();
+        
     this->ptr_move_group->execute(this->my_plan);
+}
+
+void ArmControl::publishCartesianStates(const sensor_msgs::JointState &joint_msg)
+{
+    geometry_msgs::PoseStamped msg;
+    const robot_state::JointModelGroup* joint_model_group = this->kinematic_joint.first->getJointModelGroup(this->planning_group.c_str());
+    const std::vector<std::string> joint_names = joint_model_group->getJointModelNames();
+    int j = 0;
+    for (int i = 0; i < joint_msg.name.size(); i++)
+    {
+        while (j < joint_names.size() && joint_msg.name[i].compare(joint_names[j]) != 0)
+        {
+            j++;
+        }
+        if (j < joint_names.size())
+        {
+            
+            // joint_values[j++] = joint_msg.position[i];
+            this->kinematic_joint.second->setJointPositions(joint_names[j++], &joint_msg.position[i]);
+        }
+    }
+    
+    const Eigen::Affine3d end_effector = this->kinematic_joint.second->getFrameTransform("j2s7s300_end_effector");
+    
+    Eigen::Quaterniond q(end_effector.rotation());
+    q.normalize();
+    msg.header.stamp = joint_msg.header.stamp;
+    msg.pose.orientation.x = q.x();
+    msg.pose.orientation.y = q.y();
+    msg.pose.orientation.z = q.z();
+    msg.pose.orientation.w = q.w();
+    msg.pose.position.x = end_effector(0, 3);
+    msg.pose.position.y = end_effector(1, 3);
+    msg.pose.position.z = end_effector(2, 3);
+    this->pub_cartesian_states.publish(msg);
+}
+
+void ArmControl::publishCartesianPlanTrajectory()
+{
+    armcontrolmoveit::PoseArrayStamped msg;
+    msg.header.stamp = ros::Time::now();
+    
+    const robot_state::JointModelGroup* joint_model_group = this->kinematic_plan.first->getJointModelGroup(this->planning_group.c_str());
+    const std::vector<std::string> joint_names = joint_model_group->getJointModelNames();
+
+    for (int i = 0; i < this->my_plan.trajectory_.joint_trajectory.points.size(); i++)
+    {
+        geometry_msgs::PoseStamped data;
+
+        for (int j = 0; j < this->my_plan.trajectory_.joint_trajectory.joint_names.size(); j++)
+        {
+            this->kinematic_plan.second->setJointPositions(this->my_plan.trajectory_.joint_trajectory.joint_names[j], &this->my_plan.trajectory_.joint_trajectory.points[i].positions[j]);
+        }
+        const Eigen::Affine3d end_effector = this->kinematic_plan.second->getFrameTransform("j2s7s300_end_effector");
+        Eigen::Quaterniond q(end_effector.rotation());
+        q.normalize();
+        data.header.stamp.sec = msg.header.stamp.sec + this->my_plan.trajectory_.joint_trajectory.points.at(i).time_from_start.sec;
+        data.header.stamp.nsec = msg.header.stamp.nsec + this->my_plan.trajectory_.joint_trajectory.points.at(i).time_from_start.nsec;
+        data.pose.orientation.x = q.x();
+        data.pose.orientation.y = q.y();
+        data.pose.orientation.z = q.z();
+        data.pose.orientation.w = q.w();
+        data.pose.position.x = end_effector(0, 3);
+        data.pose.position.y = end_effector(1, 3);
+        data.pose.position.z = end_effector(2, 3);
+        msg.pose.push_back(data);
+    }
+    this->pub_cartesian_plan.publish(msg);
+}
+
+void ArmControl::publishJointPlanTrajectory()
+{
+    this->my_plan.trajectory_.joint_trajectory.header.stamp = ros::Time::now();
+    this->pub_joint_plan.publish(this->my_plan.trajectory_.joint_trajectory);
 }
 
 
@@ -114,7 +204,12 @@ void ArmControl::execute()
 bool ArmControl::change_target(armcontrolmoveit::ChangeTargetRequest &req, armcontrolmoveit::ChangeTargetResponse &res)
 {
     tf::Quaternion q;
-    q.setRPY(req.roll*M_PI/180, req.pitch*M_PI/180, req.yaw*M_PI/180);
+    
+    if (req.angles_mode)
+    {
+        q.setRPY(req.roll*M_PI/180, req.pitch*M_PI/180, req.yaw*M_PI/180);
+    } else q.setRPY(req.roll, req.pitch, req.yaw);
+    
     q.normalize();
 
     geometry_msgs::Pose t;

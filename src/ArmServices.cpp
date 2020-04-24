@@ -26,6 +26,9 @@ int main(int argc, char** argv){
     ROS_INFO("Service /arm/home_service ready");
     ros::ServiceServer srv5 = nh.advertiseService("/arm/plan_trajectory", &ArmControl::plan_trajectory, &arm);
     ROS_INFO("Service /arm/plan_trajectory ready");
+
+    ros::Subscriber sub = nh.subscribe("/joint_states", 1000, &ArmControl::publishCartesianStates, &arm);
+    ROS_INFO("Suscripcion al topico /joint_states");
     
 
     while (ros::ok())

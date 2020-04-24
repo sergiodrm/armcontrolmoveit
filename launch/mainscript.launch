@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- Declarar argumentos -->
+    <arg name="outputscreen" default="true"/>
+    <!-- Ejecutar nodo -->
+    <node if="$(arg outputscreen)" pkg="armcontrolmoveit" type="main.py" name="main_abrir_puerta" required="true" output="screen"/>
+    <node unless="$(arg outputscreen)" pkg="armcontrolmoveit" type="main.py" name="main_abrir_puerta" required="true"/>
+</launch>

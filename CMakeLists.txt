@@ -23,6 +23,11 @@ find_package(catkin REQUIRED COMPONENTS
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS system)
 
+add_message_files(
+  FILES
+  PoseArrayStamped.msg
+)
+
 add_service_files(
   FILES
   ChangeTarget.srv
@@ -79,17 +84,17 @@ link_directories(${catkin_LIBRARY_DIRS})
 
 ######################## Declaracion de nodos ##########################
 
-# Nodo para inicializacion de servicios del brazo
+## Nodo para inicializacion de servicios del brazo
 add_executable(arm_services src/ArmServices.cpp src/ArmControl.cpp src/VisualTools.cpp src/Door.cpp)
 target_link_libraries(arm_services ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 install(TARGETS arm_services DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
-# Nodo para inicializacion de servicios de la puerta
+## Nodo para inicializacion de servicios de la puerta
 add_executable(door_services src/DoorServices.cpp src/VisualTools.cpp src/Door.cpp src/ArmControl.cpp)
 target_link_libraries(door_services ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 install(TARGETS door_services DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
-# Nodo de pruebas
+## Nodo de pruebas
 add_executable(pruebas_trayectorias src/pruebas_trayectorias.cpp src/VisualTools.cpp src/Door.cpp src/ArmControl.cpp)
 target_link_libraries(pruebas_trayectorias ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 install(TARGETS pruebas_trayectorias DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})

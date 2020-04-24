@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- Declarar argumentos -->
+    <arg name="launch_armservices" default="true"/>
+    <arg name="launch_doorservices" default="true"/>
+    <arg name="launch_mainnode" default="true"/>
+    <arg name="outputscreen_armservices" default="true"/>
+    <arg name="outputscreen_doorservices" default="true"/>
+    <arg name="outputscreen_mainnode" default="true"/>
+    <!-- Incluir los launch -->
+    <include if="$(arg launch_armservices)" file="$(find armcontrolmoveit)/launch/armservices.launch">
+        <arg name="outputscreen" default="$(arg outputscreen_armservices)"/>
+    </include>
+
+    <include if="$(arg launch_doorservices)" file="$(find armcontrolmoveit)/launch/doorservices.launch">
+        <arg name="outputscreen" default="$(arg outputscreen_doorservices)"/>
+    </include>
+
+    <include if="$(arg launch_mainnode)" file="$(find armcontrolmoveit)/launch/mainscript.launch">
+        <arg name="outputscreen" default="$(arg outputscreen_mainnode)"/>
+    </include>
+</launch>
