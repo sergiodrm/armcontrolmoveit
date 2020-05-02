@@ -44,6 +44,8 @@ ArmControl::ArmControl()
 
     this->pub_cartesian_plan = nh.advertise<armcontrolmoveit::PoseArrayStamped>("trajectory/cartesian_plan", 1000);
     ROS_INFO("Publicando datos de planificacion en coordenadas cartesianas en /trajectory/cartesian_plan");
+    this->pub_cartesian_plan_NotArray = nh.advertise<geometry_msgs::PoseStamped>("trajectory/cartesian_plan_NotArray", 1000);
+    ROS_INFO("Publicando datos de planificacion en coordenadas cartesianas punto a punto en /trajectory/cartesian_plan_NotArray");
     this->pub_joint_plan = nh.advertise<trajectory_msgs::JointTrajectory>("trajectory/joint_plan", 1000);
     ROS_INFO("Publicando datos de planificacion en coordenadas articulares en /trajectory/joint_plan");
     this->pub_cartesian_states = nh.advertise<geometry_msgs::PoseStamped>("arm/cartesian_states", 1000);
@@ -184,6 +186,7 @@ void ArmControl::publishCartesianPlanTrajectory()
         data.pose.position.y = end_effector(1, 3);
         data.pose.position.z = end_effector(2, 3);
         msg.pose.push_back(data);
+        this->pub_cartesian_plan_NotArray.publish(data);
     }
     this->pub_cartesian_plan.publish(msg);
 }
@@ -201,7 +204,7 @@ void ArmControl::publishJointPlanTrajectory()
 * *********                     ************
 */
 
-bool ArmControl::change_target(armcontrolmoveit::ChangeTargetRequest &req, armcontrolmoveit::ChangeTargetResponse &res)
+bool ArmControl::changeTarget(armcontrolmoveit::ChangeTargetRequest &req, armcontrolmoveit::ChangeTargetResponse &res)
 {
     tf::Quaternion q;
     
@@ -230,7 +233,7 @@ bool ArmControl::change_target(armcontrolmoveit::ChangeTargetRequest &req, armco
     return true;
 }
 
-bool ArmControl::plan_trajectory(armcontrolmoveit::PlanTrajectoryRequest &req, armcontrolmoveit::PlanTrajectoryResponse &res)
+bool ArmControl::planTrajectory(armcontrolmoveit::PlanTrajectoryRequest &req, armcontrolmoveit::PlanTrajectoryResponse &res)
 {
     bool success = false;
     if (req.type == type::articular)
@@ -264,14 +267,14 @@ bool ArmControl::plan_trajectory(armcontrolmoveit::PlanTrajectoryRequest &req, a
     return success;
 }
 
-bool ArmControl::execute_target(armcontrolmoveit::ExecuteTargetRequest &req, armcontrolmoveit::ExecuteTargetResponse &res)
+bool ArmControl::executeTarget(armcontrolmoveit::ExecuteTargetRequest &req, armcontrolmoveit::ExecuteTargetResponse &res)
 {
     this->execute();
     ROS_INFO("Trajectory executed");
     return true;
 }
 
-bool ArmControl::demo_precision(armcontrolmoveit::DemoPrecisionRequest &req, armcontrolmoveit::DemoPrecisionResponse &res)
+bool ArmControl::demoPrecision(armcontrolmoveit::DemoPrecisionRequest &req, armcontrolmoveit::DemoPrecisionResponse &res)
 {
     ROS_INFO("ROS Service: DEMO PRECISION");
 
@@ -329,7 +332,7 @@ bool ArmControl::demo_precision(armcontrolmoveit::DemoPrecisionRequest &req, arm
     return true;
 }
 
-bool ArmControl::home_service(armcontrolmoveit::HomeServiceRequest &req, armcontrolmoveit::HomeServiceResponse &res)
+bool ArmControl::homeService(armcontrolmoveit::HomeServiceRequest &req, armcontrolmoveit::HomeServiceResponse &res)
 {
     bool success = false;
     this->updateHome();

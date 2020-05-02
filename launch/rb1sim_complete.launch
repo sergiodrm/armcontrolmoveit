@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<launch>
+
+    <!-- Inicialización de argumentos -->
+    <arg name="id_robot" default="rb1"/>
+    <arg name="prefix" default="$(arg id_robot)_"/>
+    <arg name="arm_name" default="j2s7s300"/>
+    <arg name="gazebo_world" default="$(find rb1_gazebo)/worlds/rb1.world"/>
+    <arg name="map_file" default="$(find rb1_base_localization)/maps/empty/map_empty.yaml"/>
+    <arg name="launch_base_hw_sim" default="false"/>
+    <arg name="localization_robot" default="false"/>
+    <arg name="gmapping_robot" default="false"/>
+    <arg name="move_base" default="false"/>
+    <arg name="amcl_mapserver" default="false"/>
+    <arg name="xacro_robot" default="rb1_robot_$(arg arm_name).urdf.xacro"/>
+
+    <arg name="launch_armcontroller" default="true"/>
+    <arg name="use_trajectory_controller" default="false"/>
+    <arg name="is7dof" default="true"/>
+
+    <!-- Load the URDF into the ROS Parameter Server -->
+    <param name="robot_description"
+    command="$(find xacro)/xacro '$(find rb1_description)/robots/$(arg xacro_robot)' prefix:=$(arg prefix) --inorder"/>
+
+    <!-- Incluir el launch que inicia la simulacion -->
+    <include file="$(find rb1_sim_bringup)/launch/rb1_complete.launch">
+        <arg name="launch_rviz" value="true"/>
+        <arg name="gazebo_world" value="$(arg gazebo_world)"/>
+        <arg name="launch_base_hw_sim" value="$(arg launch_base_hw_sim)"/>
+
+        <!-- arguments robot a -->
+        <arg name="id_robot_a" value="$(arg id_robot)"/>
+        <arg name="launch_robot_a" value="true"/>
+        <arg name="map_file_a" value="$(arg map_file)"/>
+        <arg name="localization_robot_a" value="$(arg localization_robot)"/>
+        <arg name="gmapping_robot_a" value="$(arg gmapping_robot)"/>
+        <arg name="move_base_robot_a" value="$(arg move_base)"/>
+        <arg name="amcl_and_mapserver_a" value="$(arg amcl_mapserver)"/>
+        <arg name="map_frame_a" value="$(arg id_robot)_map"/>
+        <arg name="move_robot_a" value="true"/>
+        <arg name="arm_name_a" value="$(arg arm_name)"/>
+        <arg name="xacro_robot_a" value="rb1_robot_$(arg arm_name).urdf.xacro"/>
+    </include>
+
+    <!-- Incluir el launch de los controladores del brazo -->
+    <include if="$(arg launch_armcontroller)" file="$(find armcontrolmoveit)/launch/rb1sim_armcontroller.launch">
+        <arg name="robot_name" value="$(arg id_robot)"/>
+        <arg name="arm_name" value="$(arg arm_name)"/>
+        <arg name="use_trajectory_controller" value="$(arg use_trajectory_controller)"/>
+        <arg name="is7dof" value="$(arg is7dof)"/>
+    </include>
+</launch>

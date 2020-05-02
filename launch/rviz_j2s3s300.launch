@@ -1,6 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-    <include file="$(find j2s7s300_moveit_config)/launch/j2s7s300_virtual_robot_demo.launch" />
-
-    <node pkg="armcontrolmoveit" type="generate_arm_trajectories" name="generate_arm_trajectories"/>
-</launch>

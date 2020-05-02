@@ -16,15 +16,15 @@ int main(int argc, char** argv){
 
     ros::NodeHandle nh;
 
-    ros::ServiceServer srv1 = nh.advertiseService("/arm/change_target", &ArmControl::change_target, &arm);
+    ros::ServiceServer srv1 = nh.advertiseService("/arm/change_target", &ArmControl::changeTarget, &arm);
     ROS_INFO("Service /arm/change_target ready");
-    ros::ServiceServer srv2 = nh.advertiseService("/arm/execute_target", &ArmControl::execute_target, &arm);
+    ros::ServiceServer srv2 = nh.advertiseService("/arm/execute_target", &ArmControl::executeTarget, &arm);
     ROS_INFO("Service /arm/execute_target ready");
-    ros::ServiceServer srv3 = nh.advertiseService("/arm/demo_precision", &ArmControl::demo_precision, &arm);
+    ros::ServiceServer srv3 = nh.advertiseService("/arm/demo_precision", &ArmControl::demoPrecision, &arm);
     ROS_INFO("Service /arm/demo_precision ready"); 
-    ros::ServiceServer srv4 = nh.advertiseService("/arm/home_service", &ArmControl::home_service, &arm);
+    ros::ServiceServer srv4 = nh.advertiseService("/arm/home_service", &ArmControl::homeService, &arm);
     ROS_INFO("Service /arm/home_service ready");
-    ros::ServiceServer srv5 = nh.advertiseService("/arm/plan_trajectory", &ArmControl::plan_trajectory, &arm);
+    ros::ServiceServer srv5 = nh.advertiseService("/arm/plan_trajectory", &ArmControl::planTrajectory, &arm);
     ROS_INFO("Service /arm/plan_trajectory ready");
 
     ros::Subscriber sub = nh.subscribe("/joint_states", 1000, &ArmControl::publishCartesianStates, &arm);

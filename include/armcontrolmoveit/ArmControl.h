@@ -58,11 +58,11 @@ public:
     /*
     * Services callbacks
     */
-    bool change_target(armcontrolmoveit::ChangeTargetRequest &req, armcontrolmoveit::ChangeTargetResponse &res);
-    bool plan_trajectory(armcontrolmoveit::PlanTrajectoryRequest & req, armcontrolmoveit::PlanTrajectoryResponse &res);
-    bool execute_target(armcontrolmoveit::ExecuteTargetRequest &req, armcontrolmoveit::ExecuteTargetResponse &res);
-    bool demo_precision(armcontrolmoveit::DemoPrecisionRequest &req, armcontrolmoveit::DemoPrecisionResponse &res);
-    bool home_service(armcontrolmoveit::HomeServiceRequest &req, armcontrolmoveit::HomeServiceResponse &res);
+    bool changeTarget(armcontrolmoveit::ChangeTargetRequest &req, armcontrolmoveit::ChangeTargetResponse &res);
+    bool planTrajectory(armcontrolmoveit::PlanTrajectoryRequest & req, armcontrolmoveit::PlanTrajectoryResponse &res);
+    bool executeTarget(armcontrolmoveit::ExecuteTargetRequest &req, armcontrolmoveit::ExecuteTargetResponse &res);
+    bool demoPrecision(armcontrolmoveit::DemoPrecisionRequest &req, armcontrolmoveit::DemoPrecisionResponse &res);
+    bool homeService(armcontrolmoveit::HomeServiceRequest &req, armcontrolmoveit::HomeServiceResponse &res);
 
     /*
     * Get & Set
@@ -72,7 +72,7 @@ public:
 private:
     ros::NodeHandle nh;
     ros::Rate *ptr_rate;
-    ros::Publisher pub_cartesian_plan;
+    ros::Publisher pub_cartesian_plan, pub_cartesian_plan_NotArray;
     ros::Publisher pub_joint_plan;
     ros::Publisher pub_cartesian_states;
     std::pair<robot_model::RobotModelPtr, robot_state::RobotState*> kinematic_plan;
