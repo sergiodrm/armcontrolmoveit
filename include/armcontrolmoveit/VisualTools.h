@@ -8,6 +8,7 @@ VisualTools.h
 #include <ros/ros.h>
 #include <armcontrolmoveit/ArmControl.h>
 #include <armcontrolmoveit/Door.h>
+#include <armcontrolmoveit/UsefulFunctions.h>
 #include <math.h>
 #include <Eigen/Geometry>
 #include <visualization_msgs/Marker.h>

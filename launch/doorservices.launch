@@ -2,9 +2,21 @@
 <launch>
     <!-- Declarar argumentos -->
     <arg name="outputscreen" default="true"/>
+    <arg name="launch_ns" default="true"/>
+    <arg name="namespace" default="/rb1"/>
+
+    
     <!-- Cargar parametros desde fichero yaml -->
     <rosparam file="$(find armcontrolmoveit)/config/door_config.yaml" command="load"/>
+
     <!-- Ejecutar nodo -->
-    <node if="$(arg outputscreen)" pkg="armcontrolmoveit" type="door_services" name="door_services_SJG" output="screen"/>
-    <node unless="$(arg outputscreen)" pkg="armcontrolmoveit" type="door_services" name="door_services_SJG"/>
+    <group ns="$(arg namespace)" if="$(arg launch_ns)">
+        <node if="$(arg outputscreen)" pkg="armcontrolmoveit" type="door_services" name="door_services_SJG" output="screen"/>
+        <node unless="$(arg outputscreen)" pkg="armcontrolmoveit" type="door_services" name="door_services_SJG"/>    
+    </group>
+    <group unless="$(arg launch_ns)">
+        <node if="$(arg outputscreen)" pkg="armcontrolmoveit" type="door_services" name="door_services_SJG" output="screen"/>
+        <node unless="$(arg outputscreen)" pkg="armcontrolmoveit" type="door_services" name="door_services_SJG"/>
+    </group>
+    
 </launch>

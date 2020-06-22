@@ -2,7 +2,17 @@
 <launch>
     <!-- Declarar argumentos -->
     <arg name="outputscreen" default="true"/>
+    <arg name="launch_ns" default="true"/>
+    <arg name="namespace" default="/rb1"/>
+
     <!-- Ejecutar nodo -->
-    <node if="$(arg outputscreen)" pkg="armcontrolmoveit" type="main.py" name="main_abrir_puerta" required="true" output="screen"/>
-    <node unless="$(arg outputscreen)" pkg="armcontrolmoveit" type="main.py" name="main_abrir_puerta" required="true"/>
+    <group ns="$(arg namespace)" if="$(arg launch_ns)">
+        <node if="$(arg outputscreen)" pkg="armcontrolmoveit" type="main.py" name="main_abrir_puerta" required="true" output="screen"/>
+        <node unless="$(arg outputscreen)" pkg="armcontrolmoveit" type="main.py" name="main_abrir_puerta" required="true"/> 
+    </group>
+    <group unless="$(arg launch_ns)">
+        <node if="$(arg outputscreen)" pkg="armcontrolmoveit" type="main.py" name="main_abrir_puerta" required="true" output="screen"/>
+        <node unless="$(arg outputscreen)" pkg="armcontrolmoveit" type="main.py" name="main_abrir_puerta" required="true"/> 
+    </group>
+    
 </launch>

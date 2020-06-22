@@ -27,6 +27,7 @@ Fecha: Marzo 2020
 #include <geometry_msgs/Pose.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <armcontrolmoveit/VisualTools.h>
+#include <armcontrolmoveit/UsefulFunctions.h>
 
 
 enum axis_enum {X, Y, Z, BD, BI, AD, AI};
@@ -42,6 +43,7 @@ public:
     * Constructor & Destructor 
     */
     ArmControl();
+    ArmControl(char* ns);
     virtual ~ArmControl();
     
     /*
@@ -78,6 +80,7 @@ private:
     std::pair<robot_model::RobotModelPtr, robot_state::RobotState*> kinematic_plan;
     std::pair<robot_model::RobotModelPtr, robot_state::RobotState*> kinematic_joint;
     std::string planning_group;
+    std::string rosNamespace;
     geometry_msgs::Pose home;
     moveit::planning_interface::MoveGroupInterface *ptr_move_group;
     moveit::planning_interface::MoveGroupInterface::Plan my_plan;

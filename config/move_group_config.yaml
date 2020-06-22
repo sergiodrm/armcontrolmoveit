@@ -1,10 +1,11 @@
 move_group_config:
-  planning_group: "arm"
+  #planning_group: "arm"          # Fake node j2s7s300
+  planning_group: "j2s7s200_arm"  # Brazo Kinova j2s7s200 RB1
 config_arm:
   home:
-    x: 0.5
+    x: 0.6
     y: 0
-    z: 0.4
+    z: 0.7
     roll: 0
     pitch: 0
     yaw: 0

@@ -4,6 +4,8 @@
 
 #include <ros/ros.h>
 #include <armcontrolmoveit/Door.h>
+#include <armcontrolmoveit/ArmControl.h>
+#include <armcontrolmoveit/UsefulFunctions.h>
 
 // Provisional para inicializar la puerta
 Door crearPuerta(float orientacion, geometry_msgs::Point pos);
@@ -20,19 +22,30 @@ int main(int argc, char **argv)
     /* Crear objeto puerta: primero generar puntos de definicion */
     geometry_msgs::Point p;
     float orientacion;
-    ros::param::get("/door/ejepuerta/x", p.x);
-    ros::param::get("/door/ejepuerta/y", p.y);
-    ros::param::get("/door/ejepuerta/z", p.z);
-    ros::param::get("/door/ejepuerta/orientacion", orientacion);
+    if (argc > 1)
+    {
+        /* ros::param::get(myStrCat(argv[1], "/door/ejepuerta/x").c_str(), p.x);
+        ros::param::get(myStrCat(argv[1], "/door/ejepuerta/y").c_str(), p.y);
+        ros::param::get(myStrCat(argv[1], "/door/ejepuerta/z").c_str(), p.z);
+        ros::param::get(myStrCat(argv[1], "/door/ejepuerta/orientacion").c_str(), orientacion); */
+    } else {
+        ros::param::get("/door/ejepuerta/x", p.x);
+        ros::param::get("/door/ejepuerta/y", p.y);
+        ros::param::get("/door/ejepuerta/z", p.z);
+        ros::param::get("/door/ejepuerta/orientacion", orientacion);
+    }
+    
 
     Door mipuerta = crearPuerta(orientacion, p);
 
-    ros::ServiceServer server1 = nh.advertiseService("door/generar_trayectoria", &Door::generarTrayectoria, &mipuerta);
+    ros::ServiceServer server1 = nh.advertiseService("/door/generar_trayectoria", &Door::generarTrayectoria, &mipuerta);
     ROS_INFO("Service /door/generar_trayectoria ready");
-    ros::ServiceServer server2 = nh.advertiseService("door/girar_sistema", &Door::girarSistema, &mipuerta);
-    ROS_INFO("Service /arm/girar_sistema ready");
+    ros::ServiceServer server2 = nh.advertiseService("/door/girar_sistema", &Door::girarSistema, &mipuerta);
+    ROS_INFO("Service /door/girar_sistema ready");
     ros::ServiceServer server3 = nh.advertiseService("/door/posicion_apoyo", &Door::posicionApoyo, &mipuerta);
-    ROS_INFO("Service /arm/posicion_apoyo ready");
+    ROS_INFO("Service /door/posicion_apoyo ready");
+    ros::ServiceServer server4 = nh.advertiseService("/door/drawDoorRViz", &Door::drawDoorRViz, &mipuerta);
+    ROS_INFO("Service /door/drawDoorRViz ready");
 
     while (ros::ok())
     {

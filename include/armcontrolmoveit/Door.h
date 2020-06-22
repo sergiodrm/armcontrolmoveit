@@ -16,6 +16,8 @@
 #include <armcontrolmoveit/GenerarTrayectoriaPuerta.h>
 #include <armcontrolmoveit/GirarSistemaPuerta.h>
 #include <armcontrolmoveit/PosicionApoyo.h>
+#include <armcontrolmoveit/DrawDoorRViz.h>
+#include <armcontrolmoveit/UsefulFunctions.h>
 
 using namespace std;
 using namespace Eigen;
@@ -52,14 +54,11 @@ class Door
     bool generarTrayectoria(armcontrolmoveit::GenerarTrayectoriaPuertaRequest &req, armcontrolmoveit::GenerarTrayectoriaPuertaResponse &res);
     bool girarSistema(armcontrolmoveit::GirarSistemaPuertaRequest &req, armcontrolmoveit::GirarSistemaPuertaResponse &res);
     bool posicionApoyo(armcontrolmoveit::PosicionApoyoRequest &req, armcontrolmoveit::PosicionApoyoResponse &res);
+    bool drawDoorRViz(armcontrolmoveit::DrawDoorRVizRequest &req, armcontrolmoveit::DrawDoorRVizResponse &res);
 
 
     /* Operadores */
     Affine3d operator [](int index);
-
-    /* MISC */
-    float distancia_euclidea(geometry_msgs::Point p, geometry_msgs::Point q);
-    void transform2pose(Affine3d t, geometry_msgs::Pose &pose);
 
     private:
 

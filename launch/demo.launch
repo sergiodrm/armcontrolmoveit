@@ -1,0 +1,24 @@
+<launch>
+
+  <!-- By default, we are not in debug mode -->
+  <arg name="debug" default="false" />
+  <arg name="load_robot_description_urdf" default="true"/>
+  <arg name="load_robot_description_xacro" default="false"/>
+
+  <!-- Load the URDF, SRDF and other .yaml configuration files on the param server -->
+  <include file="$(find armcontrolmoveit)/launch/planning_context.launch">
+    <arg name="load_robot_description_urdf" value="$(arg load_robot_description_urdf)"/>
+    <arg name="load_robot_description_xacro" value="$(arg load_robot_description_xacro)"/>
+  </include>
+  
+  <!-- Run the main MoveIt! executable without trajectory execution (we do not have controllers configured by default) -->
+  <include file="$(find armcontrolmoveit)/launch/move_group.launch">
+    <arg name="allow_trajectory_execution" value="true"/>
+    <arg name="fake_execution" value="false"/>
+    <arg name="info" value="true"/>
+    <arg name="debug" value="$(arg debug)"/>
+  </include>
+
+  <rosparam file="$(find rb1_j2s7s200_moveit_config)/config/controllers.yaml"/> 
+
+</launch>

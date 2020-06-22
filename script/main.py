@@ -76,11 +76,23 @@ def planificarTrayectoria(trajectory):
         print("Llamada a servicio /arm/plan_trajectory fallida: " + str(e))
     return False
 
+def drawDoorRViz():
+    try:
+        print("Esperando al servicio: /door/drawDoorRViz")
+        rospy.wait_for_service('/door/drawDoorRViz')
+        srv = rospy.ServiceProxy('/door/drawDoorRViz', DrawDoorRViz)
+        return srv()
+    except rospy.ServiceException, e:
+        print("Llamada a servicio /door/drawDoorRViz fallida: " + str(e))
+    return False
+
 
 def abrirPuerta():
     # Primero llevar el brazo a la posicion home
     raw_input("Pulsar Enter para continuar (crtl+d para salir)...")
     if not clienteSrvHome():
+        return False
+    if not drawDoorRViz():
         return False
 
     # Pedir posicion de apoyo y prepararse para coger el picaporte
@@ -109,6 +121,8 @@ def abrirPuerta():
     print(str(punto))
     if not changeTarget(punto):
         return False
+    if not drawDoorRViz():
+        return False
     raw_input("Pulsar Enter para continuar (crtl+d para salir)...")
     if not executeTarget():
         return False
@@ -119,6 +133,8 @@ def abrirPuerta():
                                 apoyo.pose.position.z,
                                 rpy[0], rpy[1], rpy[2], 0)
     if not changeTarget(punto):
+        return False
+    if not drawDoorRViz():
         return False
     raw_input("Pulsar Enter para continuar (crtl+d para salir)...")
     if not executeTarget():
@@ -164,6 +180,8 @@ def abrirPuerta():
         req_trayectoria = PlanTrajectoryRequest(wp=tray.wp, type=1, planning_time=5, eef_step=0.1, jump_threshold=0)
         fraction = planificarTrayectoria(req_trayectoria)
         if type(fraction) is bool and not fraction:
+            return False
+        if not drawDoorRViz():
             return False
         raw_input("Pulsar Enter para continuar (crtl+d para salir)...")
         if not executeTarget():

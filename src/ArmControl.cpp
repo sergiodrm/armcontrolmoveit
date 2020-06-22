@@ -14,8 +14,11 @@ Fecha: Marzo 2020
 
 ArmControl::ArmControl()
 {
+    ROS_INFO("Loading ArmControl constructor...");
     ros::param::get("/move_group_config/planning_group", this->planning_group);
+    std::cout << "\n\033[32mPlanning group from ROS param server: \033[0m" << this->planning_group.c_str() << "\n\n";
     this->ptr_move_group = new moveit::planning_interface::MoveGroupInterface(this->planning_group.c_str());
+    std::cout << "\n\033[32mSuccess! :) \033[0m\n\n";
     ROS_INFO("Move_group connected with planning_group: %s", this->planning_group.c_str());
     // We can print the name of the reference frame for this robot.
 	ROS_INFO("Reference frame: %s", this->ptr_move_group->getPlanningFrame().c_str());
@@ -30,6 +33,7 @@ ArmControl::ArmControl()
     ros::param::get("/config_arm/home/roll", roll);
     ros::param::get("/config_arm/home/pitch", pitch);
     ros::param::get("/config_arm/home/yaw", yaw);
+    ROS_INFO("Parametros de configuracion cargados correctamente.");
     q.setRPY(roll*M_PI/180, pitch*M_PI/180, yaw*M_PI/180);
     q.normalize();
 
@@ -40,6 +44,60 @@ ArmControl::ArmControl()
     this->home.orientation.y = q.getY();
     this->home.orientation.z = q.getZ();
     this->home.orientation.w = q.getW();
+    this->vstool = new VisualTools(this->ptr_move_group->getPlanningFrame());
+
+    this->pub_cartesian_plan = nh.advertise<armcontrolmoveit::PoseArrayStamped>("trajectory/cartesian_plan", 1000);
+    ROS_INFO("Publicando datos de planificacion en coordenadas cartesianas en /trajectory/cartesian_plan");
+    this->pub_cartesian_plan_NotArray = nh.advertise<geometry_msgs::PoseStamped>("trajectory/cartesian_plan_NotArray", 1000);
+    ROS_INFO("Publicando datos de planificacion en coordenadas cartesianas punto a punto en /trajectory/cartesian_plan_NotArray");
+    this->pub_joint_plan = nh.advertise<trajectory_msgs::JointTrajectory>("trajectory/joint_plan", 1000);
+    ROS_INFO("Publicando datos de planificacion en coordenadas articulares en /trajectory/joint_plan");
+    this->pub_cartesian_states = nh.advertise<geometry_msgs::PoseStamped>("arm/cartesian_states", 1000);
+    ROS_INFO("Publicando datos de /joint_states en coordenadas cartesianas en /arm/cartesian_states");
+
+    robot_model_loader::RobotModelLoader robot_loader("robot_description");
+    this->kinematic_plan.first = robot_loader.getModel();
+    this->kinematic_plan.second = new robot_state::RobotState(this->kinematic_plan.first);
+    this->kinematic_joint.first = robot_loader.getModel();
+    this->kinematic_joint.second = new robot_state::RobotState(this->kinematic_joint.first);
+}
+
+ArmControl::ArmControl(char* ns)
+{
+    ROS_INFO("Loading ArmControl constructor...");
+    this->rosNamespace = ns;
+    /* ros::param::get(myStrCat<const char*, const char*>(this->rosNamespace.c_str(), "/move_group_config/planning_group").c_str(), this->planning_group); */
+    std::cout << "\n\033[32mPlanning group from ROS param server: \033[0m" << this->planning_group.c_str() << "\n\n";
+    this->ptr_move_group = new moveit::planning_interface::MoveGroupInterface(this->planning_group.c_str());
+    std::cout << "\n\033[32mSuccess! :) \033[0m\n\n";
+    ROS_INFO("Move_group connected with planning_group: %s", this->planning_group.c_str());
+    // We can print the name of the reference frame for this robot.
+	ROS_INFO("Reference frame: %s", this->ptr_move_group->getPlanningFrame().c_str());
+	// We can also print the name of the end-effector link for this group.
+	ROS_INFO("End effector link: %s", this->ptr_move_group->getEndEffectorLink().c_str());
+
+    double roll, pitch, yaw;
+    tf::Quaternion q;
+    
+    ros::param::get(myStrCat(this->rosNamespace, "/config_arm/home/x").c_str(), this->home.position.x);
+    ros::param::get(myStrCat(this->rosNamespace, "/config_arm/home/y").c_str(), this->home.position.y);
+    ros::param::get(myStrCat(this->rosNamespace, "/config_arm/home/z").c_str(), this->home.position.z);
+    ros::param::get(myStrCat(this->rosNamespace, "/config_arm/home/roll").c_str(), roll);
+    ros::param::get(myStrCat(this->rosNamespace, "/config_arm/home/pitch").c_str(), pitch);
+    ros::param::get(myStrCat(this->rosNamespace, "/config_arm/home/yaw").c_str(), yaw);
+    ROS_INFO("Parametros de configuracion cargados correctamente.");
+
+    q.setRPY(roll*M_PI/180, pitch*M_PI/180, yaw*M_PI/180);
+    q.normalize();
+
+    this->home.orientation.x = q.getX();
+    this->home.orientation.y = q.getY();
+    this->home.orientation.z = q.getZ();
+    this->home.orientation.w = q.getW();
+
+    std::cout << "\n\033[34mHome position:\033[0m [" << this->home.position.x << ", " << this->home.position.y << ", " << this->home.position.z << "]";
+    std::cout << "[" << this->home.orientation.x << ", " << this->home.orientation.y << ", " << this->home.orientation.z << ", " << this->home.orientation.w << "]\n\n";
+
     this->vstool = new VisualTools(this->ptr_move_group->getPlanningFrame());
 
     this->pub_cartesian_plan = nh.advertise<armcontrolmoveit::PoseArrayStamped>("trajectory/cartesian_plan", 1000);
@@ -96,12 +154,12 @@ void ArmControl::updateHome()
 {
     double x, y, z, roll, pitch, yaw;
     tf::Quaternion q;
-    ros::param::get("/config_arm/home/x", x);
-    ros::param::get("/config_arm/home/y", y);
-    ros::param::get("/config_arm/home/z", z);
-    ros::param::get("/config_arm/home/roll", roll);
-    ros::param::get("/config_arm/home/pitch", pitch);
-    ros::param::get("/config_arm/home/yaw", yaw);
+    ros::param::get(myStrCat(this->rosNamespace, "/config_arm/home/x").c_str(), x);
+    ros::param::get(myStrCat(this->rosNamespace, "/config_arm/home/y").c_str(), y);
+    ros::param::get(myStrCat(this->rosNamespace, "/config_arm/home/z").c_str(), z);
+    ros::param::get(myStrCat(this->rosNamespace, "/config_arm/home/roll").c_str(), roll);
+    ros::param::get(myStrCat(this->rosNamespace, "/config_arm/home/pitch").c_str(), pitch);
+    ros::param::get(myStrCat(this->rosNamespace, "/config_arm/home/yaw").c_str(), yaw);
     q.setRPY(roll*M_PI/180, pitch*M_PI/180, yaw*M_PI/180);
     q.normalize();
 
@@ -142,7 +200,7 @@ void ArmControl::publishCartesianStates(const sensor_msgs::JointState &joint_msg
         }
     }
     
-    const Eigen::Affine3d end_effector = this->kinematic_joint.second->getFrameTransform("j2s7s300_end_effector");
+    const Eigen::Affine3d end_effector = this->kinematic_joint.second->getFrameTransform("j2s7s200_end_effector");
     
     Eigen::Quaterniond q(end_effector.rotation());
     q.normalize();
@@ -173,7 +231,7 @@ void ArmControl::publishCartesianPlanTrajectory()
         {
             this->kinematic_plan.second->setJointPositions(this->my_plan.trajectory_.joint_trajectory.joint_names[j], &this->my_plan.trajectory_.joint_trajectory.points[i].positions[j]);
         }
-        const Eigen::Affine3d end_effector = this->kinematic_plan.second->getFrameTransform("j2s7s300_end_effector");
+        const Eigen::Affine3d end_effector = this->kinematic_plan.second->getFrameTransform("j2s7s200_end_effector");
         Eigen::Quaterniond q(end_effector.rotation());
         q.normalize();
         data.header.stamp.sec = msg.header.stamp.sec + this->my_plan.trajectory_.joint_trajectory.points.at(i).time_from_start.sec;
@@ -336,6 +394,10 @@ bool ArmControl::homeService(armcontrolmoveit::HomeServiceRequest &req, armcontr
 {
     bool success = false;
     this->updateHome();
+    ROS_INFO("Home position target: [x: %f, y: %f, z: %f] [x: %f, y: %f, z: %f, w:%f]",
+        this->home.position.x, this->home.position.y, this->home.position.z,
+        this->home.orientation.x, this->home.orientation.y, 
+        this->home.orientation.z, this->home.orientation.w);
     if (this->move_to_point(this->home))
     {
         ROS_INFO("Going home position...");

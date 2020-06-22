@@ -30,14 +30,17 @@ add_message_files(
 
 add_service_files(
   FILES
+  ### ArmControl
   ChangeTarget.srv
   ExecuteTarget.srv
   DemoPrecision.srv
   HomeService.srv
   PlanTrajectory.srv
+  ### Door
   GenerarTrayectoriaPuerta.srv
   GirarSistemaPuerta.srv
   PosicionApoyo.srv
+  DrawDoorRViz.srv
 )
 
 generate_messages(
@@ -85,17 +88,47 @@ link_directories(${catkin_LIBRARY_DIRS})
 ######################## Declaracion de nodos ##########################
 
 ## Nodo para inicializacion de servicios del brazo
-add_executable(arm_services src/ArmServices.cpp src/ArmControl.cpp src/VisualTools.cpp src/Door.cpp)
+add_executable(
+  ### Nombre del nodo
+  arm_services
+
+  ### Ficheros que usa el nodo
+  src/ArmServices.cpp 
+  src/ArmControl.cpp 
+  src/VisualTools.cpp 
+  src/Door.cpp 
+  src/UsefulFunctions.cpp
+)
 target_link_libraries(arm_services ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 install(TARGETS arm_services DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 ## Nodo para inicializacion de servicios de la puerta
-add_executable(door_services src/DoorServices.cpp src/VisualTools.cpp src/Door.cpp src/ArmControl.cpp)
+add_executable(
+  ### Nombre del nodo
+  door_services 
+
+  ### Ficheros que usa el nodo
+  src/DoorServices.cpp 
+  src/VisualTools.cpp 
+  src/Door.cpp 
+  src/ArmControl.cpp 
+  src/UsefulFunctions.cpp
+)
 target_link_libraries(door_services ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 install(TARGETS door_services DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 ## Nodo de pruebas
-add_executable(pruebas_trayectorias src/pruebas_trayectorias.cpp src/VisualTools.cpp src/Door.cpp src/ArmControl.cpp)
+add_executable(
+  ### Nombre del nodo
+  pruebas_trayectorias
+
+  ### Ficheros que usa el nodo
+  src/pruebas_trayectorias.cpp
+  src/VisualTools.cpp
+  src/Door.cpp
+  src/ArmControl.cpp
+  src/UsefulFunctions.cpp
+)
 target_link_libraries(pruebas_trayectorias ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 install(TARGETS pruebas_trayectorias DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 

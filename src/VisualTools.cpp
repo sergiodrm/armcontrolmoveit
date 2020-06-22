@@ -104,7 +104,7 @@ void VisualTools::drawDoor(Door &door)
     p = door.getSystemPoint(sistemas::APOYO);
     line.points.push_back(p);    
     
-    double r = door.distancia_euclidea(door.getSystemPoint(sistemas::EJEPICAPORTE1), door.getSystemPoint(sistemas::EJEPUERTA));
+    float r = distancia_euclidea(door.getSystemPoint(sistemas::EJEPICAPORTE1), door.getSystemPoint(sistemas::EJEPUERTA));
     r += 0.05;
     for (double giro = 0; giro < 2*M_PI; giro += 0.01)
     {
