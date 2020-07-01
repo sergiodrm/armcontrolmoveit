@@ -236,7 +236,7 @@ void ArmControl::publishCartesianStates(const sensor_msgs::JointState &joint_msg
         }
     }
     
-    const Eigen::Affine3d end_effector = this->kinematic_joint.second->getFrameTransform("j2s7s300_end_effector");
+    const Eigen::Affine3d end_effector = this->kinematic_joint.second->getFrameTransform("j2s7s200_end_effector");
     
     Eigen::Quaterniond q(end_effector.rotation());
     q.normalize();
@@ -266,7 +266,7 @@ void ArmControl::publishCartesianPlanTrajectory()
         {
             this->kinematic_plan.second->setJointPositions(this->my_plan.trajectory_.joint_trajectory.joint_names[j], &this->my_plan.trajectory_.joint_trajectory.points[i].positions[j]);
         }
-        const Eigen::Affine3d end_effector = this->kinematic_plan.second->getFrameTransform("j2s7s300_end_effector");
+        const Eigen::Affine3d end_effector = this->kinematic_plan.second->getFrameTransform("j2s7s200_end_effector");
         Eigen::Quaterniond q(end_effector.rotation());
         q.normalize();
         data.header.stamp.sec = this->cartesianPlan.header.stamp.sec + this->my_plan.trajectory_.joint_trajectory.points.at(i).time_from_start.sec;
@@ -518,7 +518,7 @@ bool ArmControl::homeService(armcontrolmoveit::HomeServiceRequest &req, armcontr
 */
 void ArmControl::jointStatesCallback(const sensor_msgs::JointState msg)
 {
-    if (msg.name[0].compare("j2s7s300_joint_1") == 0)
+    if (msg.name[0].compare("j2s7s200_joint_1") == 0)
     {
         if (this->jointStatesMsgs.size() > MAX_QUEUE_SIZE)
             this->jointStatesMsgs.pop();

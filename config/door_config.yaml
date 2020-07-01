@@ -15,5 +15,5 @@ door:
       giro: -0.5236 # radianes
       numero_puntos: 10
 rviz:
-  referenceFrame: /j2s7s300_link_base ## Para simulaciones con j2s7s300
-  #referenceFrame: /rb1_base_footprint ## Para RB-1
+  #referenceFrame: /j2s7s300_link_base ## Para simulaciones con j2s7s300
+  referenceFrame: /rb1_base_footprint ## Para RB-1
