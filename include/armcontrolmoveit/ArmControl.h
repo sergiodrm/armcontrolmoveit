@@ -13,6 +13,7 @@ Fecha: Marzo 2020
 #include <ros/ros.h>
 #include <math.h>
 #include <string.h>
+#include <queue>
 #include <Eigen/Geometry>
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/robot_model/robot_model.h>
@@ -32,6 +33,9 @@ Fecha: Marzo 2020
 
 enum axis_enum {X, Y, Z, BD, BI, AD, AI};
 enum type {articular, cartesian};
+enum errorCodeTrajectory {SUCCESS, JOINT_DIFF, PLAN_ERROR};
+const int MAX_QUEUE_SIZE = 2;
+const float MAX_DIFF_JOINTS_VALUES = 0.01;
 
 class VisualTools;
 
@@ -52,10 +56,11 @@ public:
     bool move_to_point(const geometry_msgs::Pose &target);
     const float set_trajectory(const std::vector<geometry_msgs::Pose> &wp, float eef_step, float jump_threshold);
     void updateHome();
-    void execute();
+    int execute();
     void publishCartesianStates(const sensor_msgs::JointState &joint_msg);
     void publishCartesianPlanTrajectory();
     void publishJointPlanTrajectory();
+    int checkPrintJointStates();
 
     /*
     * Services callbacks
@@ -67,6 +72,11 @@ public:
     bool homeService(armcontrolmoveit::HomeServiceRequest &req, armcontrolmoveit::HomeServiceResponse &res);
 
     /*
+    * Topics callback
+    */
+    void jointStatesCallback(const sensor_msgs::JointState msg);
+
+    /*
     * Get & Set
     */
     moveit::planning_interface::MoveGroupInterface::Plan getPlan();
@@ -74,11 +84,13 @@ public:
 private:
     ros::NodeHandle nh;
     ros::Rate *ptr_rate;
+    armcontrolmoveit::PoseArrayStamped cartesianPlan;
     ros::Publisher pub_cartesian_plan, pub_cartesian_plan_NotArray;
     ros::Publisher pub_joint_plan;
     ros::Publisher pub_cartesian_states;
     std::pair<robot_model::RobotModelPtr, robot_state::RobotState*> kinematic_plan;
     std::pair<robot_model::RobotModelPtr, robot_state::RobotState*> kinematic_joint;
+    std::queue<sensor_msgs::JointState> jointStatesMsgs;
     std::string planning_group;
     std::string rosNamespace;
     geometry_msgs::Pose home;

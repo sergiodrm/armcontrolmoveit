@@ -63,5 +63,32 @@ float distancia_euclidea(geometry_msgs::Point, geometry_msgs::Point);
  */
 void transform2pose(Eigen::Affine3d, geometry_msgs::Pose &);
 
+/* Funcion valor absoluto. 
+You already know how this works */
+template <typename T>
+T myabs(T value);
+
+template <typename T>
+T myabs(T value)
+{
+    if (value < 0)
+        return -value;
+    return value;   
+}
+
+
+/* Funcion para dejar todos los angulos entre 0 y 2pi */
+template <typename T>
+T normalizeAngle(T angle);
+
+template <typename T>
+T normalizeAngle(T angle)
+{
+    angle = fmod(angle, 2 * M_PI);
+    if (angle < 0)
+        angle += 2 * M_PI;
+    return angle;
+}
+
 
 #endif

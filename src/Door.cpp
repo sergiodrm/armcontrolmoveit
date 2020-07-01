@@ -4,9 +4,9 @@
 
 #include <armcontrolmoveit/Door.h>
 
-Door::Door(geometry_msgs::Point apoyo, geometry_msgs::Point ejepicaporte, geometry_msgs::Point ejepuerta)
+Door::Door(geometry_msgs::Point apoyo, geometry_msgs::Point ejepicaporte, geometry_msgs::Point ejepuerta, std::string referenceFrame)
 {
-    this->vstool = new VisualTools();
+    this->vstool = new VisualTools(referenceFrame);
     /* 
      * Haciendo los calculos de la distancia mas corta entre la recta formada por el punto "ejepuerta"
      * y el vector apoyo-ejepicaporte con el punto eje-picaporte, se puede sacar el punto intermedio 
@@ -23,7 +23,7 @@ Door::Door(geometry_msgs::Point apoyo, geometry_msgs::Point ejepicaporte, geomet
     if (ejepicaporte.x-apoyo.x != 0)
     {
         float m = (ejepicaporte.y-apoyo.y)/(ejepicaporte.x-apoyo.x);
-        alpha = atan(m);
+        alpha = atan2(ejepicaporte.y - apoyo.y, ejepicaporte.x - apoyo.x);
         Q.x = (P.x-m*(B.y-m*B.x-P.y))/(pow(m, 2)+1);
         Q.y = B.y + m*(Q.x-B.x);
         Q.z = A.z;
@@ -35,7 +35,7 @@ Door::Door(geometry_msgs::Point apoyo, geometry_msgs::Point ejepicaporte, geomet
             alpha = -M_PI_2;
     }
     
-
+    std::cout << "Reference frame: " << referenceFrame.c_str() << "\n";
     std::cout << "Puerta: [" << B.x << ", " << B.y << ", " << B.z << "]\n";
     std::cout << "Picaporte1: [" << Q.x << ", " << Q.y << ", " << Q.z << "]\n";
     std::cout << "Picaporte2: [" << P.x << ", " << P.y << ", " << P.z << "]\n";
@@ -66,27 +66,27 @@ Door::Door(geometry_msgs::Point apoyo, geometry_msgs::Point ejepicaporte, geomet
     this->puerta.push_back(aux);
     this->angulo_actual.push_back(0);
 
-    
-
     /* La orientacion del resto de ejes será con el eje Z perpendicular al plano de la puerta y el eje X 
      * paralelo al plano. Ideal usar angulos de Euler ZYZ para este paso */
     aux *= Translation3d(Vector3d(this->width_door, 0, 0));
-    aux *= AngleAxisd(M_PI_2, Vector3d::UnitZ())*AngleAxisd(M_PI_2, Vector3d::UnitY())*AngleAxisd(M_PI_2, Vector3d::UnitZ());
+    aux *= AngleAxisd(M_PI_2, Vector3d::UnitZ())*AngleAxisd(M_PI_2, Vector3d::UnitY());//*AngleAxisd(M_PI_2, Vector3d::UnitZ());
     this->puerta.push_back(aux);
     this->angulo_actual.push_back(0);
     
-
     /* La orientacion del punto de apoyo debe ser las misma que para el eje de giro del picaporte al ser sistemas
      * solidarios. Solo se aplica traslacion. */
     aux *= Translation3d(Vector3d(0, 0, -this->depth_latch));
     this->puerta.push_back(aux);
     this->angulo_actual.push_back(0);
     
-    aux *= Translation3d(Vector3d(this->width_latch, 0, 0));
+    /* Se adaptan las transformadas para que coincida con la orientacion del end_effector del j2s7s200 */
+    //aux *= Translation3d(Vector3d(this->width_latch, 0, 0));
+    aux *= Translation3d(Vector3d(0, this->width_latch, 0));
     this->puerta.push_back(aux);
     this->angulo_actual.push_back(0);
     
     this->drawInRViz();
+    std::cout << "\n\033[32;4mDoor ready!\033[0m\n\n";
 }
 
 Door::~Door() {}
@@ -152,10 +152,11 @@ bool Door::generarTrayectoria(armcontrolmoveit::GenerarTrayectoriaPuertaRequest 
             geometry_msgs::Pose p;
             Affine3d apoyo, tfpuerta2apoyo;
             tfpuerta2apoyo = Translation3d(Vector3d(this->width_door, 0, 0))*AngleAxisd(M_PI_2, Vector3d::UnitZ())*
-                    AngleAxisd(M_PI_2, Vector3d::UnitY())*AngleAxisd(M_PI_2, Vector3d::UnitZ())*
+                    AngleAxisd(M_PI_2, Vector3d::UnitY())*AngleAxisd(0, Vector3d::UnitZ())*
                     Translation3d(Vector3d(0, 0, -this->depth_latch))*
                     AngleAxisd(this->angulo_actual.at(sistemas::EJEPICAPORTE2), Vector3d::UnitZ())*
-                    Translation3d(Vector3d(this->width_latch, 0, 0));
+                    Translation3d(Vector3d(0, this->width_latch, 0));
+                    //Translation3d(Vector3d(this->width_latch, 0, 0));
             for (int punto = 0; punto <= (int)req.np; punto++)
             {
                 apoyo = this->puerta.at(sistemas::EJEPUERTA)*AngleAxisd(req.angulo*punto/req.np, Vector3d::UnitZ())*tfpuerta2apoyo;
@@ -174,7 +175,8 @@ bool Door::generarTrayectoria(armcontrolmoveit::GenerarTrayectoriaPuertaRequest 
             {
                 std::cout << "N: " <<punto << "/"<<  req.np << std::endl;
                 apoyo = this->puerta.at(sistemas::EJEPICAPORTE2)*
-                        AngleAxisd(punto*req.angulo/req.np, Vector3d::UnitZ()) * Translation3d(Vector3d(this->width_latch, 0, 0)); 
+                        AngleAxisd(punto*req.angulo/req.np, Vector3d::UnitZ()) * Translation3d(Vector3d(0, this->width_latch, 0));
+                        // Translation3d(Vector3d(this->width_latch, 0, 0)); 
                 transform2pose(apoyo, p);
                 res.wp.push_back(p);
                 std::cout << "Punto calculado #" << punto << ": [" << p.position.x << ", " << p.position.y << ", " << p.position.z << "] [";
@@ -199,14 +201,16 @@ bool Door::girarSistema(armcontrolmoveit::GirarSistemaPuertaRequest &req, armcon
             this->angulo_actual.at(sistemas::EJEPUERTA) += req.angulo;
             this->puerta.at(sistemas::EJEPUERTA) *= AngleAxisd(req.angulo, Vector3d::UnitZ());
             this->puerta.at(sistemas::EJEPICAPORTE1) = this->puerta.at(sistemas::EJEPUERTA)*Translation3d(Vector3d(this->width_door, 0, 0))*
-                    AngleAxisd(M_PI_2, Vector3d::UnitZ())*AngleAxisd(M_PI_2, Vector3d::UnitY())*AngleAxisd(M_PI_2, Vector3d::UnitZ());
+                    AngleAxisd(M_PI_2, Vector3d::UnitZ())*AngleAxisd(M_PI_2, Vector3d::UnitY())*AngleAxisd(0, Vector3d::UnitZ());
             this->puerta.at(sistemas::EJEPICAPORTE2) = this->puerta.at(sistemas::EJEPICAPORTE1)*Translation3d(Vector3d(0, 0, -this->depth_latch));
             this->puerta.at(sistemas::EJEPICAPORTE2) *= AngleAxisd(this->angulo_actual.at(sistemas::EJEPICAPORTE2), Vector3d::UnitZ());
-            this->puerta.at(sistemas::APOYO) = this->puerta.at(sistemas::EJEPICAPORTE2)*Translation3d(Vector3d(this->width_latch, 0, 0));
+            this->puerta.at(sistemas::APOYO) = this->puerta.at(sistemas::EJEPICAPORTE2)*Translation3d(Vector3d(0, this->width_latch, 0));
+            // Translation3d(Vector3d(this->width_latch, 0, 0));
         } else {
             this->angulo_actual.at(sistemas::EJEPICAPORTE2) += req.angulo;
             this->puerta.at(sistemas::EJEPICAPORTE2) *= AngleAxisd(req.angulo, Vector3d::UnitZ());
-            this->puerta.at(sistemas::APOYO) = this->puerta.at(sistemas::EJEPICAPORTE2)*Translation3d(Vector3d(this->width_latch, 0, 0));
+            this->puerta.at(sistemas::APOYO) = this->puerta.at(sistemas::EJEPICAPORTE2)*Translation3d(Vector3d(0, this->width_latch, 0));
+            // Translation3d(Vector3d(this->width_latch, 0, 0));
         }
         this->drawInRViz();
         success = true;

@@ -4,7 +4,6 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /MotionPlanning1
         - /MotionPlanning1/Planning Request1
       Splitter Ratio: 0.742560029
     Tree Height: 205
@@ -535,13 +534,217 @@ Visualization Manager:
         Show Robot Visual: true
       Value: true
       Velocity_Scaling_Factor: 1
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /rb1/visualization_marker
+      Name: Marker
+      Namespaces:
+        limit_and_lines: true
+      Queue Size: 100
+      Value: true
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: visualization_marker_array
+      Marker Topic: /rviz_visual_tools
       Name: MarkerArray
       Namespaces:
-        {}
+        APOYO: true
+        EJE_PICAPORTE1: true
+        EJE_PICAPORTE2: true
+        EJE_PUERTA: true
+        Text: true
       Queue Size: 100
+      Value: true
+    - Class: rviz/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: false
+        arm_base_link:
+          Value: false
+        base_link:
+          Value: false
+        base_link_frd:
+          Value: false
+        head_link:
+          Value: false
+        head_tilt_link:
+          Value: false
+        j2s7s200_end_effector:
+          Value: true
+        j2s7s200_link_1:
+          Value: false
+        j2s7s200_link_2:
+          Value: false
+        j2s7s200_link_3:
+          Value: false
+        j2s7s200_link_4:
+          Value: false
+        j2s7s200_link_5:
+          Value: false
+        j2s7s200_link_6:
+          Value: false
+        j2s7s200_link_7:
+          Value: false
+        j2s7s200_link_base:
+          Value: false
+        j2s7s200_link_finger_1:
+          Value: false
+        j2s7s200_link_finger_2:
+          Value: false
+        j2s7s200_link_finger_tip_1:
+          Value: false
+        j2s7s200_link_finger_tip_2:
+          Value: false
+        map:
+          Value: false
+        map_ned:
+          Value: false
+        odom:
+          Value: false
+        odom_ned:
+          Value: false
+        rb1_base_docking_contact_link:
+          Value: false
+        rb1_base_footprint:
+          Value: true
+        rb1_base_link:
+          Value: false
+        rb1_front_cover_link:
+          Value: false
+        rb1_front_laser_base_link:
+          Value: false
+        rb1_front_laser_link:
+          Value: false
+        rb1_front_rgbd_camera_depth_frame:
+          Value: false
+        rb1_front_rgbd_camera_depth_optical_frame:
+          Value: false
+        rb1_front_rgbd_camera_link:
+          Value: false
+        rb1_front_rgbd_camera_rgb_base_link:
+          Value: false
+        rb1_front_rgbd_camera_rgb_optical_frame:
+          Value: false
+        rb1_imu_link:
+          Value: false
+        rb1_left_wheel_link:
+          Value: false
+        rb1_map:
+          Value: false
+        rb1_odom:
+          Value: false
+        rb1_omni_backwheel_link:
+          Value: false
+        rb1_omni_front_leftwheel_link:
+          Value: false
+        rb1_omni_front_rightwheel_link:
+          Value: false
+        rb1_right_wheel_link:
+          Value: false
+        rb1_top_cover_link:
+          Value: false
+        rb1_torso_rgbd_camera_depth_frame:
+          Value: false
+        rb1_torso_rgbd_camera_depth_optical_frame:
+          Value: false
+        rb1_torso_rgbd_camera_link:
+          Value: false
+        rb1_torso_rgbd_camera_rgb_base_link:
+          Value: false
+        rb1_torso_rgbd_camera_rgb_optical_frame:
+          Value: false
+        torso_base_link:
+          Value: false
+        torso_cover_link:
+          Value: false
+        torso_guide_link:
+          Value: false
+        torso_link:
+          Value: false
+        torso_slider_link:
+          Value: false
+      Marker Scale: 1
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: false
+      Tree:
+        rb1_map:
+          base_link:
+            base_link_frd:
+              {}
+          map:
+            map_ned:
+              {}
+          odom:
+            odom_ned:
+              {}
+          rb1_odom:
+            rb1_base_footprint:
+              rb1_base_link:
+                rb1_front_cover_link:
+                  rb1_base_docking_contact_link:
+                    {}
+                rb1_front_laser_link:
+                  rb1_front_laser_base_link:
+                    {}
+                rb1_front_rgbd_camera_rgb_base_link:
+                  rb1_front_rgbd_camera_depth_frame:
+                    rb1_front_rgbd_camera_depth_optical_frame:
+                      {}
+                  rb1_front_rgbd_camera_link:
+                    {}
+                  rb1_front_rgbd_camera_rgb_optical_frame:
+                    {}
+                rb1_imu_link:
+                  {}
+                rb1_left_wheel_link:
+                  {}
+                rb1_omni_backwheel_link:
+                  {}
+                rb1_omni_front_leftwheel_link:
+                  {}
+                rb1_omni_front_rightwheel_link:
+                  {}
+                rb1_right_wheel_link:
+                  {}
+                torso_base_link:
+                  torso_link:
+                    torso_guide_link:
+                      {}
+                    torso_slider_link:
+                      arm_base_link:
+                        j2s7s200_link_base:
+                          j2s7s200_link_1:
+                            j2s7s200_link_2:
+                              j2s7s200_link_3:
+                                j2s7s200_link_4:
+                                  j2s7s200_link_5:
+                                    j2s7s200_link_6:
+                                      j2s7s200_link_7:
+                                        j2s7s200_end_effector:
+                                          {}
+                                        j2s7s200_link_finger_1:
+                                          j2s7s200_link_finger_tip_1:
+                                            {}
+                                        j2s7s200_link_finger_2:
+                                          j2s7s200_link_finger_tip_2:
+                                            {}
+                      head_link:
+                        head_tilt_link:
+                          rb1_torso_rgbd_camera_rgb_base_link:
+                            rb1_torso_rgbd_camera_depth_frame:
+                              rb1_torso_rgbd_camera_depth_optical_frame:
+                                {}
+                            rb1_torso_rgbd_camera_link:
+                              {}
+                            rb1_torso_rgbd_camera_rgb_optical_frame:
+                              {}
+                      torso_cover_link:
+                        {}
+              rb1_top_cover_link:
+                {}
+      Update Interval: 0
       Value: true
   Enabled: true
   Global Options:
@@ -559,25 +762,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/XYOrbit
-      Distance: 3.54693365
+      Distance: 3.64145827
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.09605968
-        Y: -0.140723646
-        Z: 1.05798301e-06
+        X: 0.0426819324
+        Y: 0.36931318
+        Z: -1.34109882e-07
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.364797264
+      Pitch: 0.974796891
       Target Frame: rb1_base_footprint
       Value: XYOrbit (rviz)
-      Yaw: 5.86312675
+      Yaw: 3.36812115
     Saved: ~
 Window Geometry:
   Displays:

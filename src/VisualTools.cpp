@@ -4,7 +4,16 @@
 
 VisualTools::VisualTools()
 {
-    this->ptr_visual_tools = new moveit_visual_tools::MoveItVisualTools("/world");
+    std::string referenceFrame;
+    if (ros::param::has("/rviz/referenceFrame"))
+    {
+        ros::param::get("/rviz/referenceFrame", referenceFrame);
+    } else {
+        referenceFrame = "/root";
+        ROS_WARN("Frame de referencia no especificado ni en codigo ni en parametro. Establecido por defecto: %s",
+            referenceFrame.c_str());
+    }
+    this->ptr_visual_tools = new moveit_visual_tools::MoveItVisualTools(referenceFrame.c_str());
     this->ptr_visual_tools->deleteAllMarkers();
     this->ptr_visual_tools->loadRemoteControl();
     this->text_pose = Eigen::Affine3d::Identity();
@@ -15,11 +24,15 @@ VisualTools::VisualTools()
 
 VisualTools::VisualTools(const std::string &reference_string)
 {
+    
     this->ptr_visual_tools = new moveit_visual_tools::MoveItVisualTools(reference_string.c_str());
     this->ptr_visual_tools->deleteAllMarkers();
     this->ptr_visual_tools->loadRemoteControl();
     this->text_pose = Eigen::Affine3d::Identity();
     /* this->text_pose.translation.z() = 1.5; */
+    marker_pub = this->nh.advertise<visualization_msgs::Marker>("visualization_marker", 10);
+    ROS_INFO("Reference frame: %s", reference_string.c_str());
+    ROS_INFO("Publishing in topic /visualization_marker");
 }
 
 VisualTools::~VisualTools()
@@ -58,7 +71,7 @@ void VisualTools::drawTrajectory(std::vector<geometry_msgs::Pose> wp, ArmControl
 
 void VisualTools::drawDoor(Door &door)
 {
-
+    ROS_INFO("Drawing door in RViz...");
     this->ptr_visual_tools->publishAxisLabeled(door.getSystemPose(sistemas::EJEPUERTA), "EJE_PUERTA", rviz_visual_tools::SMALL);
     this->ptr_visual_tools->publishAxisLabeled(door.getSystemPose(sistemas::EJEPICAPORTE1), "EJE_PICAPORTE1", rviz_visual_tools::SMALL);
     this->ptr_visual_tools->publishAxisLabeled(door.getSystemPose(sistemas::EJEPICAPORTE2), "EJE_PICAPORTE2", rviz_visual_tools::SMALL);
@@ -118,9 +131,6 @@ void VisualTools::drawDoor(Door &door)
 
     marker_pub.publish(limit);
     marker_pub.publish(line);
-
-    
-    
 }
 
 void VisualTools::deleteAllMarkers()

@@ -7,12 +7,23 @@
 
     <!-- Ejecutar nodo -->
     <group ns="$(arg namespace)" if="$(arg launch_ns)">
-        <node if="$(arg outputscreen)" pkg="armcontrolmoveit" type="main.py" name="main_abrir_puerta" required="true" output="screen"/>
-        <node unless="$(arg outputscreen)" pkg="armcontrolmoveit" type="main.py" name="main_abrir_puerta" required="true"/> 
+
+        <node if="$(arg outputscreen)" pkg="armcontrolmoveit" type="main.py" 
+        name="main_abrir_puerta" required="true" output="screen" args="$(arg namespace)"/>
+
+        <node unless="$(arg outputscreen)" pkg="armcontrolmoveit" type="main.py" 
+        name="main_abrir_puerta" required="true" args="$(arg namespace)"/> 
+
     </group>
+    
     <group unless="$(arg launch_ns)">
-        <node if="$(arg outputscreen)" pkg="armcontrolmoveit" type="main.py" name="main_abrir_puerta" required="true" output="screen"/>
-        <node unless="$(arg outputscreen)" pkg="armcontrolmoveit" type="main.py" name="main_abrir_puerta" required="true"/> 
+
+        <node if="$(arg outputscreen)" pkg="armcontrolmoveit" type="main.py" 
+        name="main_abrir_puerta" required="true" output="screen"/>
+
+        <node unless="$(arg outputscreen)" pkg="armcontrolmoveit" type="main.py" 
+        name="main_abrir_puerta" required="true"/> 
+
     </group>
     
 </launch>

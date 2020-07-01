@@ -31,7 +31,7 @@ class Door
 {
     public:
 
-    Door(geometry_msgs::Point apoyo, geometry_msgs::Point ejepicaporte, geometry_msgs::Point ejepuerta);
+    Door(geometry_msgs::Point apoyo, geometry_msgs::Point ejepicaporte, geometry_msgs::Point ejepuerta, std::string referenceFrame="/rb1_base_footprint");
     virtual ~Door();
 
     void drawInRViz();

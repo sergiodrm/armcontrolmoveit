@@ -1,7 +1,8 @@
 geometry_msgs/Pose[] wp
 uint8 type
-uint8 planning_time
+float32 planning_time
 float32 eef_step
 float32 jump_threshold
 ---
 float32 fraction
+int32 errorCode
