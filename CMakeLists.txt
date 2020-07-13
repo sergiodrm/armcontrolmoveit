@@ -37,9 +37,9 @@ add_service_files(
   HomeService.srv
   PlanTrajectory.srv
   ### Door
-  GenerarTrayectoriaPuerta.srv
-  GirarSistemaPuerta.srv
-  PosicionApoyo.srv
+  GenerateDoorTrajectory.srv
+  RotateSystem.srv
+  SupportPosition.srv
   DrawDoorRViz.srv
 )
 
@@ -60,7 +60,9 @@ catkin_package(
   DEPENDS system_lib EIGEN3
 )
 
-
+#catkin_install_python(PROGRAMS script/main.py script/TestOpenDoorScript.py
+#  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+#)
 
 ###################################
 ## catkin specific configuration ##
@@ -109,7 +111,7 @@ add_executable(
 
   ### Ficheros que usa el nodo
   src/DoorServices.cpp 
-  src/VisualTools.cpp 
+  src/VisualTools.cpp
   src/Door.cpp 
   src/ArmControl.cpp 
   src/UsefulFunctions.cpp

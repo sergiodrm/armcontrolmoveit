@@ -184,7 +184,7 @@ int ArmControl::execute()
     this->publishCartesianPlanTrajectory();
     
     errorCode = this->checkPrintJointStates();
-    if (errorCode == errorCodeTrajectory::SUCCESS)
+    if (errorCode == errorCodeTrajectory::SUCCESS || errorCode == errorCodeTrajectory::JOINT_DIFF)
     {
         this->ptr_move_group->execute(this->my_plan);
         std::cout << "\n---------- Execution summary ----------\n";

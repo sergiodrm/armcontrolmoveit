@@ -14,8 +14,8 @@
     <arg name="outputscreen_doorservices" default="true"/>
 
     <!-- Argumentos de mainscript.launch -->
-    <arg name="launch_mainnode" default="true"/>
-    <arg name="outputscreen_mainnode" default="true"/>
+    <arg name="launch_mainnode" default="false"/>
+    <arg name="test_mode" default="false"/>
 
     <!-- *** Incluir los launch *** -->
     <include if="$(arg launch_armservices)" file="$(find armcontrolmoveit)/launch/armservices.launch">
@@ -31,8 +31,8 @@
     </include>
 
     <include if="$(arg launch_mainnode)" file="$(find armcontrolmoveit)/launch/mainscript.launch">
-        <arg name="outputscreen" default="$(arg outputscreen_mainnode)"/>
         <arg name="namespace" default="$(arg namespace)"/>
         <arg name="launch_ns" default="$(arg launch_ns)"/>
+        <arg name="test_mode" default="$(arg test_mode)"/>
     </include>
 </launch>

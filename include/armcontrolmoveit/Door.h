@@ -13,9 +13,9 @@
 #include <iostream>
 #include <tf/tf.h>
 #include <armcontrolmoveit/VisualTools.h>
-#include <armcontrolmoveit/GenerarTrayectoriaPuerta.h>
-#include <armcontrolmoveit/GirarSistemaPuerta.h>
-#include <armcontrolmoveit/PosicionApoyo.h>
+#include <armcontrolmoveit/GenerateDoorTrajectory.h>
+#include <armcontrolmoveit/RotateSystem.h>
+#include <armcontrolmoveit/SupportPosition.h>
 #include <armcontrolmoveit/DrawDoorRViz.h>
 #include <armcontrolmoveit/UsefulFunctions.h>
 
@@ -51,9 +51,9 @@ class Door
 
 
     /* Services */
-    bool generarTrayectoria(armcontrolmoveit::GenerarTrayectoriaPuertaRequest &req, armcontrolmoveit::GenerarTrayectoriaPuertaResponse &res);
-    bool girarSistema(armcontrolmoveit::GirarSistemaPuertaRequest &req, armcontrolmoveit::GirarSistemaPuertaResponse &res);
-    bool posicionApoyo(armcontrolmoveit::PosicionApoyoRequest &req, armcontrolmoveit::PosicionApoyoResponse &res);
+    bool generateSystem(armcontrolmoveit::GenerateDoorTrajectoryRequest &req, armcontrolmoveit::GenerateDoorTrajectoryResponse &res);
+    bool rotateSystem(armcontrolmoveit::RotateSystemRequest &req, armcontrolmoveit::RotateSystemResponse &res);
+    bool supportPosition(armcontrolmoveit::SupportPositionRequest &req, armcontrolmoveit::SupportPositionResponse &res);
     bool drawDoorRViz(armcontrolmoveit::DrawDoorRVizRequest &req, armcontrolmoveit::DrawDoorRVizResponse &res);
 
 
@@ -62,7 +62,7 @@ class Door
 
     private:
 
-    std::vector<Affine3d> puerta;
+    std::vector<Affine3d> doorSystems;
     std::vector<float> angulo_actual;
     VisualTools *vstool;
 

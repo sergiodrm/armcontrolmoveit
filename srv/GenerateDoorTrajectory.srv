@@ -1,7 +1,8 @@
-# GirarSistemaPuerta.srv
+# GenerateDoorTrajectory.srv
 # · sistema: 0 -> puerta; 1 -> picaporte
 # · angulo en radianes
 float32 angulo
+uint8 np
 int32 sistema
 ---
-bool success
+geometry_msgs/Pose[] wp

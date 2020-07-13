@@ -3,17 +3,25 @@
 # ----------------
 door:
   ejepuerta:
-    x: 0.8
-    y: 0.8
-    z: 0.5
-    orientacion: 0 # radianes
+    x: 1.12
+    y: 0
+    z: 0.97
+    orientacion: 0.6845886824 # radianes
   apertura:
     picaporte:
       giro: -0.5236 # radianes
       numero_puntos: 10
     puerta:
-      giro: -0.5236 # radianes
+      giro: -1.047 # radianes
       numero_puntos: 10
+  sistemas:
+    puerta: 0
+    picaporte: 1
+  medidas:
+    largo: 0.09
+    profundo: 0.05
+    ancho: 0.77
 rviz:
   #referenceFrame: /j2s7s300_link_base ## Para simulaciones con j2s7s300
   referenceFrame: /rb1_base_footprint ## Para RB-1
+  #referenceFrame: /rb1_map

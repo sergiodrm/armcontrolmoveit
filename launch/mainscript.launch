@@ -1,28 +1,28 @@
 <?xml version="1.0"?>
 <launch>
     <!-- Declarar argumentos -->
-    <arg name="outputscreen" default="true"/>
     <arg name="launch_ns" default="true"/>
     <arg name="namespace" default="/rb1"/>
+    <arg name="test_mode" default="false"/>
 
     <!-- Ejecutar nodo -->
     <group ns="$(arg namespace)" if="$(arg launch_ns)">
 
-        <node if="$(arg outputscreen)" pkg="armcontrolmoveit" type="main.py" 
-        name="main_abrir_puerta" required="true" output="screen" args="$(arg namespace)"/>
+        <node if="$(arg test_mode)" pkg="armcontrolmoveit" type="main.py" name="test_open_door"
+        required="true" output="screen" args="test $(arg namespace)"/>
 
-        <node unless="$(arg outputscreen)" pkg="armcontrolmoveit" type="main.py" 
-        name="main_abrir_puerta" required="true" args="$(arg namespace)"/> 
-
+        <node unless="$(arg test_mode)" pkg="armcontrolmoveit" type="main.py" name="open_door"
+        required="true" output="screen" args="not_test $(arg namespace)"/>
+            
     </group>
     
     <group unless="$(arg launch_ns)">
 
-        <node if="$(arg outputscreen)" pkg="armcontrolmoveit" type="main.py" 
-        name="main_abrir_puerta" required="true" output="screen"/>
+        <node if="$(arg test_mode)" pkg="armcontrolmoveit" type="main.py" name="test_open_door"
+        required="true" output="screen" args="test"/>
 
-        <node unless="$(arg outputscreen)" pkg="armcontrolmoveit" type="main.py" 
-        name="main_abrir_puerta" required="true"/> 
+        <node unless="$(arg test_mode)" pkg="armcontrolmoveit" type="main.py" name="open_door"
+        required="true" output="screen" args="not_test"/>
 
     </group>
     
