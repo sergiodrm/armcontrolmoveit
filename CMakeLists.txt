@@ -36,6 +36,7 @@ add_service_files(
   DemoPrecision.srv
   HomeService.srv
   PlanTrajectory.srv
+  SetJointValues.srv
   ### Door
   GenerateDoorTrajectory.srv
   RotateSystem.srv

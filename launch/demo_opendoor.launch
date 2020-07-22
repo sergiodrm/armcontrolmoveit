@@ -7,14 +7,14 @@
 
     <!-- Argumentos de armservices.launch -->
     <arg name="launch_armservices" default="true"/>
-    <arg name="outputscreen_armservices" default="true"/>
+    <arg name="outputscreen_armservices" default="false"/>
 
     <!-- Argumentos de doorservices.launch -->
     <arg name="launch_doorservices" default="true"/>
-    <arg name="outputscreen_doorservices" default="true"/>
+    <arg name="outputscreen_doorservices" default="false"/>
 
     <!-- Argumentos de mainscript.launch -->
-    <arg name="launch_mainnode" default="false"/>
+    <arg name="launch_mainnode" default="true"/>
     <arg name="test_mode" default="false"/>
 
     <!-- *** Incluir los launch *** -->

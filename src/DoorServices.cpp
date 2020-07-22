@@ -3,12 +3,20 @@
 */
 
 #include <ros/ros.h>
+#include <std_msgs/Bool.h>
 #include <armcontrolmoveit/Door.h>
 #include <armcontrolmoveit/ArmControl.h>
 #include <armcontrolmoveit/UsefulFunctions.h>
 
 // Provisional para inicializar la puerta
 Door crearPuerta(float orientacion, geometry_msgs::Point pos, std::string refFrame, float ancho=0.77, float prof=0.05, float largo=0.10);
+
+// Lectura de topico para crear el modelo de la puerta cuando termine la navegacion
+static bool RunNav = true;
+void readRunNav(const std_msgs::Bool& msg)
+{
+    RunNav = msg.data;
+}
 
 int main(int argc, char **argv)
 {
@@ -18,6 +26,11 @@ int main(int argc, char **argv)
     ros::Rate r(2);
 
     ros::NodeHandle nh;
+
+    /* Antes de generar el modelo de la puerta 
+    hay que esperar que termine la navegacion.
+    Se suscribe al topic que indica la finalizacion de la fase */
+    ros::Subscriber subRunNav = nh.subscribe("/running_door_navigation", 1000, readRunNav);
 
     std::string refFrame;
     /* Crear objeto puerta: primero generar puntos de definicion */
@@ -41,7 +54,17 @@ int main(int argc, char **argv)
         ros::param::get("/door/ejepuerta/orientacion", orientacion);
         ros::param::get("/rviz/referenceFrame", refFrame);
     }
+
+    /* Con todos los parametros cargados, hay que esperar a la finalizacion de la navegacion */
     
+    if (ros::param::has(myStrCat(argv[1], "/running_door_navigation").c_str()))
+    {
+        cout << "Esperando que termine la fase de navegacion...\n";
+        bool run;
+        do {
+            ros::param::get("/running_door_navigation", run);
+        } while (run);
+    }
 
     Door mipuerta = crearPuerta(orientacion, p, refFrame, ancho, prof, largo);
 

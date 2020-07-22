@@ -25,6 +25,7 @@ Fecha: Marzo 2020
 #include <armcontrolmoveit/DemoPrecision.h>
 #include <armcontrolmoveit/HomeService.h>
 #include <armcontrolmoveit/PlanTrajectory.h>
+#include <armcontrolmoveit/SetJointValues.h>
 #include <geometry_msgs/Pose.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <armcontrolmoveit/VisualTools.h>
@@ -70,6 +71,7 @@ public:
     bool executeTarget(armcontrolmoveit::ExecuteTargetRequest &req, armcontrolmoveit::ExecuteTargetResponse &res);
     bool demoPrecision(armcontrolmoveit::DemoPrecisionRequest &req, armcontrolmoveit::DemoPrecisionResponse &res);
     bool homeService(armcontrolmoveit::HomeServiceRequest &req, armcontrolmoveit::HomeServiceResponse &res);
+    bool setJointValues(armcontrolmoveit::SetJointValuesRequest &req, armcontrolmoveit::SetJointValuesResponse &res);
 
     /*
     * Topics callback

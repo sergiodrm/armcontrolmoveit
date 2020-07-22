@@ -16,7 +16,7 @@
   <arg name="load_robot_description_urdf" default="true"/>
   <arg name="load_robot_description_xacro" default="false"/>
   <arg name="remap_tftree" default="true"/>
-  <arg name="launch_rviz" default="true"/>
+  <arg name="launch_rviz" default="false"/>
 
   <!--
   By default, hide joint_state_publisher's GUI

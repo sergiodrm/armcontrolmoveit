@@ -10,3 +10,4 @@ config_arm:
     roll: 0
     pitch: 90
     yaw: 0
+secure_position_arm: false

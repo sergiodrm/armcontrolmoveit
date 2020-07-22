@@ -1,0 +1,7 @@
+####################
+# SetJointValues.srv
+####################
+float32[] positions
+---
+float32[] states
+bool success

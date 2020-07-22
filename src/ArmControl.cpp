@@ -60,7 +60,7 @@ ArmControl::ArmControl()
     this->kinematic_plan.second = new robot_state::RobotState(this->kinematic_plan.first);
     this->kinematic_joint.first = robot_loader.getModel();
     this->kinematic_joint.second = new robot_state::RobotState(this->kinematic_joint.first);
-
+    
     std::cout << "\n\033[32;4mArmControl ready!\033[0m\n\n";
 }
 
@@ -129,22 +129,36 @@ ArmControl::~ArmControl(){
 *        Methods to move & update position  
 */
 
-bool ArmControl::move_to_point(const geometry_msgs::Pose &target){
+bool ArmControl::move_to_point(const geometry_msgs::Pose &target)
+{
+    /* Leer el parametro de planning time y configurar tiempo de planificacion */
+    float planning_time;
+    ros::param::get("/rb1/move_group_config/planning_time", planning_time);
+    this->ptr_move_group->setPlanningTime(planning_time);
+
+    /* Cambiar el objetivo de moveit y planificar la trayectoria articular */
     this->ptr_move_group->setPoseTarget(target);
-    
-    
     bool success =  this->ptr_move_group->plan(this->my_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS;
 
+    /* Graficar trayectoria en RViz*/
     std::vector<geometry_msgs::Pose> wp;
     wp.push_back(target);
-    
     this->vstool->drawTrajectory(wp, *this);
+    
     return success;
 }
 
 const float ArmControl::set_trajectory(const std::vector<geometry_msgs::Pose> &wp, float eef_step, float jump_threshold)
 {
+    /* Leer el parametro de planning time y configurarlo en moveit */
+    float planning_time;
+    ros::param::get("/rb1/move_group_config/planning_time", planning_time);
+    this->ptr_move_group->setPlanningTime(planning_time);
+
+    /* Planificar trayectoria*/
     float fraction = this->ptr_move_group->computeCartesianPath(wp, eef_step, jump_threshold, this->my_plan.trajectory_);
+
+    /* Comprobar resultado de la planificacion */
     if (fraction <= 0)
     {
         ROS_ERROR("Error planning... (fraction = %f)", fraction);
@@ -322,14 +336,14 @@ bool ArmControl::changeTarget(armcontrolmoveit::ChangeTargetRequest &req, armcon
 {
     tf::Quaternion q;
     res.errorCode = errorCodeTrajectory::SUCCESS;
-    if (req.planning_time >= 2)
-    {
-        ROS_INFO("Setting planning time: %f seconds", req.planning_time);
-        this->ptr_move_group->setPlanningTime(req.planning_time);
-    } else if (req.planning_time > 0 && req.planning_time < 2)
-    {
-        ROS_WARN("Planning time too low");
-    }
+    // if (req.planning_time >= 2)
+    // {
+    //     ROS_INFO("Setting planning time: %f seconds", req.planning_time);
+    //     this->ptr_move_group->setPlanningTime(req.planning_time);
+    // } else if (req.planning_time > 0 && req.planning_time < 2)
+    // {
+    //     ROS_WARN("Planning time too low");
+    // }
     if (req.angles_mode)
     {
         q.setRPY(req.roll*M_PI/180, req.pitch*M_PI/180, req.yaw*M_PI/180);
@@ -370,17 +384,23 @@ bool ArmControl::changeTarget(armcontrolmoveit::ChangeTargetRequest &req, armcon
 
 bool ArmControl::planTrajectory(armcontrolmoveit::PlanTrajectoryRequest &req, armcontrolmoveit::PlanTrajectoryResponse &res)
 {
+    /* Crear variable de exito de la planificacion */
     bool success = false;
     float eef_step = 0.01, jump_threshold = 0;
     res.errorCode = errorCodeTrajectory::SUCCESS;
-    if (req.planning_time >= 2)
-    {
-        ROS_INFO("Setting planning time: %f seconds", req.planning_time);
-        this->ptr_move_group->setPlanningTime(req.planning_time);
-    } else if (req.planning_time > 0 && req.planning_time < 2)
-    {
-        ROS_WARN("Planning time too low");
-    }
+    // if (req.planning_time >= 2)
+    // {
+    //     ROS_INFO("Setting planning time: %f seconds", req.planning_time);
+    //     this->ptr_move_group->setPlanningTime(req.planning_time);
+    // } else if (req.planning_time > 0 && req.planning_time < 2)
+    // {
+    //     ROS_WARN("Planning time too low");
+    // }
+
+    /* Si la planificacion es articular, 
+    mandar el ultimo punto especificado
+    al metodo move_to_point. 
+    Si la trayectoria es cartesiana se llama al metodo set_trajectory */
     if (req.type == type::articular)
     {
         success = this->move_to_point(req.wp.at(req.wp.size()-1));
@@ -404,7 +424,7 @@ bool ArmControl::planTrajectory(armcontrolmoveit::PlanTrajectoryRequest &req, ar
             
             res.fraction = this->set_trajectory(req.wp, eef_step, jump_threshold);
         }
-        
+        /* Si el fraction devuelto es menor del 0.2 se considera planificacion fallida */
         if (res.fraction > 0.2)
         {
             std::cout << "---------- Planning summary ----------\n";
@@ -491,12 +511,17 @@ bool ArmControl::demoPrecision(armcontrolmoveit::DemoPrecisionRequest &req, armc
 
 bool ArmControl::homeService(armcontrolmoveit::HomeServiceRequest &req, armcontrolmoveit::HomeServiceResponse &res)
 {
+    /* Variable de salida que indica el exito de la operacion */
     bool success = false;
+
+    /* Actualizacion del punto home */
     this->updateHome();
     ROS_INFO("Home position target: [x: %f, y: %f, z: %f] [x: %f, y: %f, z: %f, w:%f]",
         this->home.position.x, this->home.position.y, this->home.position.z,
         this->home.orientation.x, this->home.orientation.y, 
         this->home.orientation.z, this->home.orientation.w);
+    
+    /* Llamada al metodo move_to_point para mover a la posicion home */
     if (this->move_to_point(this->home))
     {
         ROS_INFO("Going home position...");
@@ -505,10 +530,61 @@ bool ArmControl::homeService(armcontrolmoveit::HomeServiceRequest &req, armcontr
         ROS_INFO("Goal achieved!");
         success = true;
     } else {
+        /* Si falla, devolver en la respuesta el error correspondiente */
         res.errorCode = errorCodeTrajectory::PLAN_ERROR;
         ROS_ERROR("Error at setting position target...");
     }
     return success;
+}
+
+bool ArmControl::setJointValues(armcontrolmoveit::SetJointValuesRequest &req, armcontrolmoveit::SetJointValuesResponse &res)
+{
+    /* Leer el parametro de planning time */
+    float planning_time;
+    ros::param::get("/rb1/move_group_config/planning_time", planning_time);
+    this->ptr_move_group->setPlanningTime(planning_time);
+
+    /* Crear modelo del robot para leer posteriormente la posicion resultante*/
+    const robot_state::JointModelGroup* joint_model_group =
+        this->ptr_move_group->getCurrentState()->getJointModelGroup(this->planning_group.c_str());
+    moveit::core::RobotStatePtr current_state = this->ptr_move_group->getCurrentState();
+
+    /* Crear vector de posiciones y copiar datos del request */
+    std::vector<double> joint_group_positions, joint_states;
+    current_state->copyJointGroupPositions(joint_model_group, joint_states);
+    for (int i = 0; i < req.positions.size(); i++)
+    {
+        // std::cout << "Joint " << i << ": " << joint_states[i] << " - " << req.positions[i] << std::endl;
+        if (myabs(joint_states[i] - req.positions[i]) > 2 * M_PI)
+        {
+            float div = joint_states[i] / (2*M_PI);
+            int turns = myabs(round(div) - div) <= 0.02 ? round(div) : floor(div);
+            joint_group_positions.push_back(req.positions[i] + turns * 2 * M_PI);
+        } else {
+            joint_group_positions.push_back(req.positions[i]);
+        }
+    }
+    // std::cout << "joint values: ";
+    // for (double value : joint_group_positions)
+    //     std::cout << value << " ";
+    // std::cout << std::endl;
+
+    /* Realizar planificacion con moveit */
+    this->ptr_move_group->setJointValueTarget(joint_group_positions);
+    res.success = this->ptr_move_group->plan(this->my_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS;
+
+    /* Ejecutar trayectoria */
+    this->execute();
+
+    /* Lectura de valores articulares para ver el error de posicion*/
+    current_state = this->ptr_move_group->getCurrentState();
+    current_state->copyJointGroupPositions(joint_model_group, joint_group_positions);
+    for (double value : joint_group_positions)
+    {
+        res.states.push_back(value);
+    }
+
+    return true;
 }
 
 /*

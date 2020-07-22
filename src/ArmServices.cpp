@@ -39,6 +39,8 @@ int main(int argc, char** argv){
     ROS_INFO("Service /arm/home_service ready");
     ros::ServiceServer srv5 = nh.advertiseService("/arm/plan_trajectory", &ArmControl::planTrajectory, arm);
     ROS_INFO("Service /arm/plan_trajectory ready");
+    ros::ServiceServer srv6 = nh.advertiseService("/arm/set_joint_values", &ArmControl::setJointValues, arm);
+    ROS_INFO("Service /arm/set_joint_values ready");
 
     std::string topic = "/joint_states";
     if (!ns.empty())

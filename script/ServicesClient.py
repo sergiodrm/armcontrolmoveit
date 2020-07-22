@@ -3,6 +3,11 @@
 import rospy
 from armcontrolmoveit.srv import *
 import numpy as np
+import trajectory_msgs.msg
+import dynamixel_workbench_msgs.msg
+import actionlib
+import kinova_msgs.msg
+import sensor_msgs.msg
 
 SUCCESS = 0
 JOINT_DIFF_ERROR = 1
@@ -13,6 +18,8 @@ EXECUTION_ERROR = 4
 OPEN_GRIPPER = 0
 CLOSE_GRIPPER = 1.5
 
+TorsoInMotion = False
+JointValues = [0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 def clienteSrvHome():
     srvName = "/arm/home_service"
@@ -130,6 +137,17 @@ def drawDoorRViz():
         print("Llamada a servicio %s fallida: %s" % (srvName, str(e)))
     return False
 
+def setJointValuesService(req):
+    srvName = "/arm/set_joint_values"
+    try:
+        print("Esperando al servicio " + srvName)
+        rospy.wait_for_service(srvName)
+        srv = rospy.ServiceProxy(srvName, SetJointValues)
+        return srv(req)
+    except rospy.ServiceException, e:
+        print("Llamada a servicio %s fallida: %s" % (srvName, str(e)))
+    return False
+
 def loadParameter(name, defaultValue):
     if rospy.has_param(name):
         return rospy.get_param(name)
@@ -167,3 +185,86 @@ def GoToPoint(point, rpy, planning_time=10):
         else:
             return EXECUTION_ERROR
     return SUCCESS
+
+######################################################################
+### Funcion para publicar en el topico encargado de mover el torso ###
+######################################################################
+def TorsoJointTrajectory(position=0, joint='torso_slider_joint'):
+    ## Variables de ROS necesarias
+    rate = rospy.Rate(1)
+
+    # Suscripcion para detectar cuando el torso ha dejado de moverse.
+    # La llamada a esta funcion asume que cuando siga el hilo de ejecucion
+    # el torso ya esta en la posicion deseada, por lo que tiene que comprobar
+    # que los motores han dejado de moverse
+    sub = rospy.Subscriber("/rb1/torso_controllers/dynamixel_state", 
+                            dynamixel_workbench_msgs.msg.DynamixelStateList, 
+                            TorsoMotionCallback)
+    # Para publicar en el topico correspondiente
+    TorsoPub = rospy.Publisher('/rb1/torso_controllers/joint_trajectory',
+                                 trajectory_msgs.msg.JointTrajectory, queue_size=10)
+
+    ## Crear el mensaje
+    TorsoMsg = trajectory_msgs.msg.JointTrajectory()
+    TorsoPoint = trajectory_msgs.msg.JointTrajectoryPoint()
+    TorsoPoint.positions.append(position)
+    TorsoMsg.header.stamp = rospy.Time.now()
+    TorsoMsg.joint_names.append(joint)
+    TorsoMsg.points.append(TorsoPoint)
+    rate.sleep()
+
+    ## Publicar
+    TorsoPub.publish(TorsoMsg)
+    rate.sleep()
+
+    ## Comprobar cuando deja de moverse el torso
+    while TorsoInMotion:
+        rate.sleep()
+
+
+def TorsoMotionCallback(msg):
+    global TorsoInMotion
+    for state in msg.dynamixel_state:
+        if state.id == 1:
+            if -30 < state.present_velocity < 30:
+                TorsoInMotion = False
+                
+            else:
+                TorsoInMotion = True
+
+# def JointStateCallback(msg):
+#     if msg.name[0] == 'j2s7s200_joint_1':
+#         global JointValues
+#         for i in range(len(msg.position)):
+#             JointValues[i] = msg.position[i] * 180 / np.pi
+
+# def SetJointValuesFunction(positions=[180, 320, 0, 320, 0, 180, 0]):
+#     ## Inicializar variables de ros
+#     rate = rospy.Rate(1)
+#     sub = rospy.Subscriber('/rb1/joint_states', sensor_msgs.msg.JointState, JointStateCallback)
+#     rate.sleep()
+#     client = actionlib.SimpleActionClient('/rb1/j2s7s200_driver/joints_action/joint_angles', 
+#                                             kinova_msgs.msg.ArmJointAnglesAction)
+#     client.wait_for_server()
+
+#     ## Comprobar estado de las articulaciones para no dar vueltas de mas
+#     for i in range(len(positions)):
+#         if not -1 < np.round(JointValues[i]) / 360 < 1:
+#             positions[i] += np.floor( np.round(JointValues[i]) / 360 ) * 360
+#     print(str(positions))
+#     print(str(JointValues))
+#     raw_input("lkfvlkdkk")
+
+#     goal = kinova_msgs.msg.ArmJointAnglesActionGoal()
+#     goal.goal.angles.joint1 = positions[0]
+#     goal.goal.angles.joint2 = positions[1]
+#     goal.goal.angles.joint3 = positions[2]
+#     goal.goal.angles.joint4 = positions[3]
+#     goal.goal.angles.joint5 = positions[4]
+#     goal.goal.angles.joint6 = positions[5]
+#     goal.goal.angles.joint7 = positions[6]
+    
+
+#     client.send_goal_and_wait(goal.goal)
+#     print(str(client.get_result()))
+    

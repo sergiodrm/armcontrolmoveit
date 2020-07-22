@@ -8,7 +8,6 @@ float32 roll
 float32 pitch
 float32 yaw
 int8 angles_mode
-float32 planning_time
 ---
 bool success
 int32 errorCode
