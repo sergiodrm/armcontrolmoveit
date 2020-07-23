@@ -7,6 +7,10 @@ import trajectory_msgs.msg
 import numpy as np
 from tf.transformations import euler_from_quaternion, quaternion_matrix
 
+def abs(value):
+    if value < 0:
+        return -value
+    return value
 
 def OpenDoor(ns="", test_mode=False):
     # Planning time
@@ -63,8 +67,7 @@ def OpenDoor(ns="", test_mode=False):
     # Realizar la planificacion del punto al que se desea ir
     resultGoToPoint = ServicesClient.GoToPoint(
         [pos_prep[0, 3], pos_prep[1, 3], pos_prep[2, 3]],
-        rpy,
-        planning_time
+        rpy
     )
     while not resultGoToPoint == ServicesClient.SUCCESS:
         if resultGoToPoint == ServicesClient.EXECUTION_ERROR:
@@ -85,8 +88,7 @@ def OpenDoor(ns="", test_mode=False):
 
     resultGoToPoint = ServicesClient.GoToPoint(
         [apoyo.pose.position.x, apoyo.pose.position.y, apoyo.pose.position.z],
-        rpy,
-        planning_time
+        rpy
     )
     while not resultGoToPoint == ServicesClient.SUCCESS:
         if resultGoToPoint == ServicesClient.EXECUTION_ERROR:
@@ -173,7 +175,7 @@ def OpenDoor(ns="", test_mode=False):
         while not success:
             # Planning
             resPlanTrajectory = ServicesClient.planTrajectory(
-                PlanTrajectoryRequest(wp=tray.wp, type=1, planning_time=planning_time, eef_step=0.1, jump_threshold=0)
+                PlanTrajectoryRequest(wp=tray.wp, type=1, eef_step=0.1, jump_threshold=0)
             )
             # Check planning
             if not resPlanTrajectory.errorCode == ServicesClient.SUCCESS:
@@ -231,8 +233,7 @@ def OpenDoor(ns="", test_mode=False):
     # Retirar la mano un poco del picaporte para evitar colisiones
     resultGoToPoint = ServicesClient.GoToPoint(
         [pos_prep[0, 3], pos_prep[1, 3], pos_prep[2, 3]],
-        rpy,
-        planning_time
+        rpy
     )
     while not resultGoToPoint == ServicesClient.SUCCESS:
         if resultGoToPoint == ServicesClient.EXECUTION_ERROR:
@@ -242,8 +243,7 @@ def OpenDoor(ns="", test_mode=False):
         raw_input("Pulsar Enter para intentar de nuevo la planificacion y ejecucion... (ctrl+d para salir)")
         resultGoToPoint = ServicesClient.GoToPoint(
             [pos_prep[0, 3], pos_prep[1, 3], pos_prep[2, 3]],
-            rpy,
-            planning_time
+            rpy
         )
 
     print("Movimiento realizado con exito!")
@@ -257,8 +257,7 @@ def OpenDoor(ns="", test_mode=False):
     # Realizar la planificacion del punto al que se desea ir
     resultGoToPoint = ServicesClient.GoToPoint(
         [pos_prep[0, 3], pos_prep[1, 3], pos_prep[2, 3]],
-        rpy,
-        planning_time
+        rpy
     )
     while not resultGoToPoint == ServicesClient.SUCCESS:
         if resultGoToPoint == ServicesClient.EXECUTION_ERROR:
@@ -268,8 +267,7 @@ def OpenDoor(ns="", test_mode=False):
         raw_input("Pulsar Enter para intentar de nuevo la planificacion y ejecucion... (ctrl+d para salir)")
         resultGoToPoint = ServicesClient.GoToPoint(
             [pos_prep[0, 3], pos_prep[1, 3], pos_prep[2, 3]],
-            rpy,
-            planning_time
+            rpy
         )
 
     print("Movimiento realizado con exito!")
@@ -277,8 +275,7 @@ def OpenDoor(ns="", test_mode=False):
     # Realizar la planificacion del punto al que se desea ir
     resultGoToPoint = ServicesClient.GoToPoint(
         [0.5, 0, 0.7],
-        [0, 0, 0],
-        planning_time
+        [0, 0, 0]
     )
     while not resultGoToPoint == ServicesClient.SUCCESS:
         if resultGoToPoint == ServicesClient.EXECUTION_ERROR:
@@ -288,8 +285,7 @@ def OpenDoor(ns="", test_mode=False):
         raw_input("Pulsar Enter para intentar de nuevo la planificacion y ejecucion... (ctrl+d para salir)")
         resultGoToPoint = ServicesClient.GoToPoint(
             [0.5, 0, 0.7],
-            [0, 0, 0],
-            planning_time
+            [0, 0, 0]
         )
 
     print("Movimiento realizado con exito!")

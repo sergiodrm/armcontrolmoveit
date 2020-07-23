@@ -156,7 +156,7 @@ def loadParameter(name, defaultValue):
         return defaultValue
 
 
-def GoToPoint(point, rpy, planning_time=10):
+def GoToPoint(point, rpy):
     resChangeTarget = changeTarget(
         ChangeTargetRequest(
             point[0],
@@ -165,8 +165,7 @@ def GoToPoint(point, rpy, planning_time=10):
             rpy[0],
             rpy[1],
             rpy[2],
-            0,
-            planning_time
+            0
         )
     )
     if not resChangeTarget.success and not resChangeTarget.errorCode == JOINT_DIFF_ERROR:

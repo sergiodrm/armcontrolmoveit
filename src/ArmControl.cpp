@@ -554,15 +554,7 @@ bool ArmControl::setJointValues(armcontrolmoveit::SetJointValuesRequest &req, ar
     current_state->copyJointGroupPositions(joint_model_group, joint_states);
     for (int i = 0; i < req.positions.size(); i++)
     {
-        // std::cout << "Joint " << i << ": " << joint_states[i] << " - " << req.positions[i] << std::endl;
-        if (myabs(joint_states[i] - req.positions[i]) > 2 * M_PI)
-        {
-            float div = joint_states[i] / (2*M_PI);
-            int turns = myabs(round(div) - div) <= 0.02 ? round(div) : floor(div);
-            joint_group_positions.push_back(req.positions[i] + turns * 2 * M_PI);
-        } else {
-            joint_group_positions.push_back(req.positions[i]);
-        }
+        joint_group_positions.push_back(req.positions[i]);
     }
     // std::cout << "joint values: ";
     // for (double value : joint_group_positions)
@@ -578,8 +570,8 @@ bool ArmControl::setJointValues(armcontrolmoveit::SetJointValuesRequest &req, ar
 
     /* Lectura de valores articulares para ver el error de posicion*/
     current_state = this->ptr_move_group->getCurrentState();
-    current_state->copyJointGroupPositions(joint_model_group, joint_group_positions);
-    for (double value : joint_group_positions)
+    current_state->copyJointGroupPositions(joint_model_group, joint_states);
+    for (double value : joint_states)
     {
         res.states.push_back(value);
     }

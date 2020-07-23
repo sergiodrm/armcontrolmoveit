@@ -10,7 +10,7 @@ import armcontrolmoveit.msg
 def main(ns="", test_mode=False):
     
     # Inicializar el nodo
-    print("Inicializando nodo...")
+    rospy.loginfo("Inicializando nodo...")
     rospy.init_node("open_door")
     rate = rospy.Rate(10)
 
@@ -31,31 +31,31 @@ def main(ns="", test_mode=False):
     ######### 2 ###########
     ## Llamar al servicio que pone el torso en posicion home 
     ## para posteriormente levantarlo y tener mayor alcance
-    print('Asegurando posicion del torso...')
+    rospy.loginfo('Asegurando posicion del torso...')
     nameService = "/rb1/torso_controllers/set_home"
     try:
         srv = rospy.ServiceProxy(nameService, std_srvs.srv.Empty)
         srv()
     except rospy.ServiceException, e:
-        print("Error en la llamada al servicio. Probando a publicar manualmente")
+        rospy.logwarn("Error en la llamada al servicio. Probando a publicar manualmente")
         ServicesClient.TorsoJointTrajectory()
 
     ######### 3 ###########
     ## Colocar el brazo en una configuracion segura #####
-    print('Colocando brazo en configuracion segura...')
+    rospy.loginfo('Colocando brazo en configuracion segura...')
     ## Crear peticion
     req = armcontrolmoveit.srv.SetJointValuesRequest()
-    req.positions = [180, 320, 0, 320, 0, 180, 0] # Angulos en grados por comodidad
-    for i in range(len(req.positions)):
-        req.positions[i] *= np.pi / 180 # Pasar angulos a rads
+    req.positions = [180, 310, 0, 320, 0, 180, 0] # Angulos en grados por comodidad
+    req.positions = [ item * np.pi / 180 for item in req.positions ] # Pasar angulos a rads
 
     
     ## Llamada a la funcion que realiza la peticion del servicio
     res = ServicesClient.setJointValuesService(req)
+
     ## Respuesta == bool -> error
     ## Respuesta != bool and res.success ok -> go on
     if type(res) is bool:
-        print('Error en la llamada al servicio en la colocacion segura del brazo.')
+        rospy.logwarn('Error en la llamada al servicio en la colocacion segura del brazo.')
         decision = raw_input('Volver a intentar? (S/N)')
         intentos = 0
         if decision.upper() == 'S':
@@ -67,6 +67,30 @@ def main(ns="", test_mode=False):
         if not i < 10 or decision.upper() == 'N':
             raw_input('Colocar el brazo manualmente en posicion segura y pulsar Enter para continuar...')
     
+    ## En caso de exito, comprobar el error articular. Si es mayor de 2 grados en alguna 
+    ## de las articulaciones se vuelve a invocar al servicio con la misma peticion
+    if res.success:
+        posok = False
+        while not posok:
+            error_pos = []
+            for i in range(len(req.positions)):
+                if abs(res.states[i]) >= 2 * np.pi - 2 * np.pi / 180:
+                    error_pos.append(abs(req.positions[i] - (abs(res.states[i]) - 2 * np.pi)))
+                else:
+                    error_pos.append(abs(req.positions[i] - res.states[i]))
+
+            i = 0
+            while i < len(error_pos) and abs(error_pos[i]) < 2 * np.pi / 180:
+                i += 1
+            
+            if not i == len(error_pos):
+                rospy.logwarn('Posicionamiento seguro no completado. Ejecucion con demasiado error.')
+                rospy.loginfo('Volviendo a invocar al servicio...')
+                res = ServicesClient.setJointValuesService(req)
+            else:
+                rospy.loginfo('Ejecucion correcta.')
+                posok = True
+
     ######### 4 ###########
     print('Brazo colocado en posicion segura!')
     rospy.set_param(ns + '/secure_position_arm', True)

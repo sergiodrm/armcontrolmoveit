@@ -27,11 +27,6 @@ int main(int argc, char **argv)
 
     ros::NodeHandle nh;
 
-    /* Antes de generar el modelo de la puerta 
-    hay que esperar que termine la navegacion.
-    Se suscribe al topic que indica la finalizacion de la fase */
-    ros::Subscriber subRunNav = nh.subscribe("/running_door_navigation", 1000, readRunNav);
-
     std::string refFrame;
     /* Crear objeto puerta: primero generar puntos de definicion */
     geometry_msgs::Point p;
@@ -59,15 +54,23 @@ int main(int argc, char **argv)
     
     if (ros::param::has(myStrCat(argv[1], "/running_door_navigation").c_str()))
     {
-        cout << "Esperando que termine la fase de navegacion...\n";
+        ROS_INFO("Esperando que termine la navegacion...");
         bool run;
         do {
-            ros::param::get("/running_door_navigation", run);
+            ros::param::get(myStrCat(argv[1], "/running_door_navigation").c_str(), run);
         } while (run);
+    } else {
+        ROS_ERROR("Parametro %s no encontrado.", myStrCat(argv[1], "/running_door_navigation").c_str());
     }
 
+    ROS_INFO("Parametro %s indica que se puede generar el modelo de la puerta.", 
+        myStrCat(argv[1], "/running_door_navigation").c_str());
+    ROS_INFO("Generando modelo...");
+
+    /* Generar modelo de la puerta */
     Door mipuerta = crearPuerta(orientacion, p, refFrame, ancho, prof, largo);
 
+    /* Inicializar los servicios de la clase Door */
     ros::ServiceServer server1 = nh.advertiseService("/door/generate_trajectory", &Door::generateSystem, &mipuerta);
     ROS_INFO("Service /door/generate_trajectory ready");
     ros::ServiceServer server2 = nh.advertiseService("/door/rotate_system", &Door::rotateSystem, &mipuerta);
@@ -80,9 +83,8 @@ int main(int argc, char **argv)
     std::cout << "\n\033[32;4mDoor services ready!\033[0m\n\n";
 
     while (ros::ok())
-    {
         ros::spinOnce();
-    }
+    
     
     ros::shutdown();
     return 0;
