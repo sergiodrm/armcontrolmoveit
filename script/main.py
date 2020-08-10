@@ -7,13 +7,7 @@ import ServicesClient
 import std_srvs.srv
 import armcontrolmoveit.msg
 
-def main(ns="", test_mode=False):
-    
-    # Inicializar el nodo
-    rospy.loginfo("Inicializando nodo...")
-    rospy.init_node("open_door")
-    rate = rospy.Rate(10)
-
+def wait_for_navigation(ns=''):
     ##########################################################################################################
     # Inicio del programa:
     #       1 -> crear parametro para indicar que el brazo NO esta en posicion segura
@@ -22,6 +16,7 @@ def main(ns="", test_mode=False):
     #       4 -> cambiar parametro para indicar a la navegacion que puede moverse
     #       5 -> esperar a que termine la navegacion
     ##########################################################################################################
+    rate = rospy.Rate(0.5)
 
     ######### 1 ###########
     ## Comprobar la existencia del parametro de posicion segura
@@ -51,26 +46,12 @@ def main(ns="", test_mode=False):
     
     ## Llamada a la funcion que realiza la peticion del servicio
     res = ServicesClient.setJointValuesService(req)
-
-    ## Respuesta == bool -> error
-    ## Respuesta != bool and res.success ok -> go on
-    if type(res) is bool:
-        rospy.logwarn('Error en la llamada al servicio en la colocacion segura del brazo.')
-        decision = raw_input('Volver a intentar? (S/N)')
-        intentos = 0
-        if decision.upper() == 'S':
-            while type(res) is bool and not res.success and intentos < 10:
-                res = ServicesClient.setJointValuesService(req)
-                if type(res) is bool or not res.success:
-                    intentos += 1
-        
-        if not i < 10 or decision.upper() == 'N':
-            raw_input('Colocar el brazo manualmente en posicion segura y pulsar Enter para continuar...')
     
     ## En caso de exito, comprobar el error articular. Si es mayor de 2 grados en alguna 
     ## de las articulaciones se vuelve a invocar al servicio con la misma peticion
-    if res.success:
+    if not type(res) is bool and res.success:
         posok = False
+        ## Esta bien colocado? seguro? seguro? seguro? seguro? seguro? ...
         while not posok:
             error_pos = []
             for i in range(len(req.positions)):
@@ -90,34 +71,44 @@ def main(ns="", test_mode=False):
             else:
                 rospy.loginfo('Ejecucion correcta.')
                 posok = True
+    else:
+        rospy.logerr('Error en la colocacion segura del brazo.')
+        return False
 
     ######### 4 ###########
-    print('Brazo colocado en posicion segura!')
+    rospy.loginfo('Brazo colocado en posicion segura!')
     rospy.set_param(ns + '/secure_position_arm', True)
 
     ######### 5 ###########
     ## Esperar que termine la fase de navegacion antes 
     ## de iniciar la apertura de la puerta
     # rospy.set_param("/secure_position_arm", True)
-    i = 0
-    cad = ['/', '-', '\\', '|']
-    RunNav = rospy.get_param(ns + "/running_door_navigation", default=True)
+    RunNav = rospy.get_param(ns + "/running_nav", default=True)
     while RunNav:
-        print('Esperando que termine la fase de navegacion ' + cad[i])
-        sys.stdout.write("\033[F")
-        i += 1
-        if i >= len(cad):
-            i = 0
+        rospy.loginfo('Esperando que termine la fase de navegacion...')
         rate.sleep()
-        RunNav = rospy.get_param(ns + "/running_door_navigation", default=True)
+        RunNav = rospy.get_param(ns + "/running_nav", default=True)
+    
+
+
+def main(ns="", test_mode=False):
+    
+    # Inicializar el nodo
+    rospy.loginfo("Inicializando nodo...")
+    rospy.init_node("open_door")
+    rate = rospy.Rate(1)
+    
+    ## Si se esta corriendo la navegacion conjuntamente, esperar que termine
+    if rospy.get_param(ns + '/running_nav'):
+        wait_for_navigation(ns)
 
     ######################################################################################################
     # Inicio del proceso de apertura
 
     if OpenDoor(ns, test_mode):
-        print("Goal achieved!")
+        rospy.loginfo("Goal achieved!")
     else:
-        print("Something was wrong! :(")
+        rospy.logerr("Something was wrong! :(")
 
 #########################################################################################
 #########################################################################################

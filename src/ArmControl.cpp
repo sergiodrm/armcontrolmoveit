@@ -37,13 +37,13 @@ ArmControl::ArmControl()
     q.setRPY(roll*M_PI/180, pitch*M_PI/180, yaw*M_PI/180);
     q.normalize();
 
-    this->home.position.x = x;
-    this->home.position.y = y;
-    this->home.position.z = z;
-    this->home.orientation.x = q.getX();
-    this->home.orientation.y = q.getY();
-    this->home.orientation.z = q.getZ();
-    this->home.orientation.w = q.getW();
+    this->home_pose.position.x = x;
+    this->home_pose.position.y = y;
+    this->home_pose.position.z = z;
+    this->home_pose.orientation.x = q.getX();
+    this->home_pose.orientation.y = q.getY();
+    this->home_pose.orientation.z = q.getZ();
+    this->home_pose.orientation.w = q.getW();
     this->vstool = new VisualTools(this->ptr_move_group->getPlanningFrame());
 
     this->pub_cartesian_plan = nh.advertise<armcontrolmoveit::PoseArrayStamped>("trajectory/cartesian_plan", 1000);
@@ -81,24 +81,31 @@ ArmControl::ArmControl(char* ns)
     double roll, pitch, yaw;
     tf::Quaternion q;
     
-    ros::param::get(myStrCat(this->rosNamespace, "/config_arm/home/x").c_str(), this->home.position.x);
-    ros::param::get(myStrCat(this->rosNamespace, "/config_arm/home/y").c_str(), this->home.position.y);
-    ros::param::get(myStrCat(this->rosNamespace, "/config_arm/home/z").c_str(), this->home.position.z);
+    ros::param::get(myStrCat(this->rosNamespace, "/config_arm/home/x").c_str(), this->home_pose.position.x);
+    ros::param::get(myStrCat(this->rosNamespace, "/config_arm/home/y").c_str(), this->home_pose.position.y);
+    ros::param::get(myStrCat(this->rosNamespace, "/config_arm/home/z").c_str(), this->home_pose.position.z);
     ros::param::get(myStrCat(this->rosNamespace, "/config_arm/home/roll").c_str(), roll);
     ros::param::get(myStrCat(this->rosNamespace, "/config_arm/home/pitch").c_str(), pitch);
     ros::param::get(myStrCat(this->rosNamespace, "/config_arm/home/yaw").c_str(), yaw);
+    std::string param = myStrCat(this->rosNamespace, "/config_arm/home/joint_");
+    for (int i = 0; i < this->home_joints.size(); i++)
+    {
+        double value;
+        ros::param::get(myStrCat(param, std::to_string(i+1)).c_str(), value);
+        this->home_joints.push_back(value);
+    }
     ROS_INFO("Parametros de configuracion cargados correctamente.");
 
     q.setRPY(roll*M_PI/180, pitch*M_PI/180, yaw*M_PI/180);
     q.normalize();
 
-    this->home.orientation.x = q.getX();
-    this->home.orientation.y = q.getY();
-    this->home.orientation.z = q.getZ();
-    this->home.orientation.w = q.getW();
+    this->home_pose.orientation.x = q.getX();
+    this->home_pose.orientation.y = q.getY();
+    this->home_pose.orientation.z = q.getZ();
+    this->home_pose.orientation.w = q.getW();
 
-    std::cout << "\n\033[34mHome position:\033[0m [" << this->home.position.x << ", " << this->home.position.y << ", " << this->home.position.z << "]";
-    std::cout << "[" << this->home.orientation.x << ", " << this->home.orientation.y << ", " << this->home.orientation.z << ", " << this->home.orientation.w << "]\n\n";
+    std::cout << "\n\033[34mHome position:\033[0m [" << this->home_pose.position.x << ", " << this->home_pose.position.y << ", " << this->home_pose.position.z << "]";
+    std::cout << "[" << this->home_pose.orientation.x << ", " << this->home_pose.orientation.y << ", " << this->home_pose.orientation.z << ", " << this->home_pose.orientation.w << "]\n\n";
 
     this->vstool = new VisualTools(this->ptr_move_group->getPlanningFrame());
 
@@ -171,6 +178,7 @@ const float ArmControl::set_trajectory(const std::vector<geometry_msgs::Pose> &w
 
 void ArmControl::updateHome()
 {
+    /* Home pose */
     double x, y, z, roll, pitch, yaw;
     tf::Quaternion q;
     ros::param::get(myStrCat(this->rosNamespace, "/config_arm/home/x").c_str(), x);
@@ -182,13 +190,19 @@ void ArmControl::updateHome()
     q.setRPY(roll*M_PI/180, pitch*M_PI/180, yaw*M_PI/180);
     q.normalize();
 
-    this->home.position.x = x;
-    this->home.position.y = y;
-    this->home.position.z = z;
-    this->home.orientation.x = q.getX();
-    this->home.orientation.y = q.getY();
-    this->home.orientation.z = q.getZ();
-    this->home.orientation.w = q.getW();
+    this->home_pose.position.x = x;
+    this->home_pose.position.y = y;
+    this->home_pose.position.z = z;
+    this->home_pose.orientation.x = q.getX();
+    this->home_pose.orientation.y = q.getY();
+    this->home_pose.orientation.z = q.getZ();
+    this->home_pose.orientation.w = q.getW();
+
+    /* Home Joints */
+    std::string param = myStrCat(this->rosNamespace, "/config_arm/home/joint_");
+    for (int i = 0; i < this->home_joints.size(); i++)
+        ros::param::get(myStrCat(param, std::to_string(i+1)).c_str(), this->home_joints[i]);
+    
 }
 
 int ArmControl::execute()
@@ -460,7 +474,7 @@ bool ArmControl::demoPrecision(armcontrolmoveit::DemoPrecisionRequest &req, armc
     ros::Duration d(3);
 
     // Move to home position
-    this->move_to_point(this->home);
+    this->move_to_point(this->home_pose);
     this->execute();
     switch (req.axis)
     {
@@ -501,7 +515,7 @@ bool ArmControl::demoPrecision(armcontrolmoveit::DemoPrecisionRequest &req, armc
         this->execute();
         d.sleep();
 
-        this->move_to_point(this->home);
+        this->move_to_point(this->home_pose);
         this->execute();
         d.sleep();
     }
@@ -516,13 +530,13 @@ bool ArmControl::homeService(armcontrolmoveit::HomeServiceRequest &req, armcontr
 
     /* Actualizacion del punto home */
     this->updateHome();
-    ROS_INFO("Home position target: [x: %f, y: %f, z: %f] [x: %f, y: %f, z: %f, w:%f]",
-        this->home.position.x, this->home.position.y, this->home.position.z,
-        this->home.orientation.x, this->home.orientation.y, 
-        this->home.orientation.z, this->home.orientation.w);
+    // ROS_INFO("Home position target: [x: %f, y: %f, z: %f] [x: %f, y: %f, z: %f, w:%f]",
+    //     this->home_pose.position.x, this->home_pose.position.y, this->home_pose.position.z,
+    //     this->home_pose.orientation.x, this->home_pose.orientation.y, 
+    //     this->home_pose.orientation.z, this->home_pose.orientation.w);
     
-    /* Llamada al metodo move_to_point para mover a la posicion home */
-    if (this->move_to_point(this->home))
+    /* Llamada al metodo move_to_point para mover a la posicion home_pose */
+    if (this->move_to_point(this->home_pose))
     {
         ROS_INFO("Going home position...");
         ROS_INFO("Executing...");

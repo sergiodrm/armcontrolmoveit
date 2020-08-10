@@ -51,20 +51,20 @@ int main(int argc, char **argv)
     }
 
     /* Con todos los parametros cargados, hay que esperar a la finalizacion de la navegacion */
-    
-    if (ros::param::has(myStrCat(argv[1], "/running_door_navigation").c_str()))
+    std::string param_nav = "/running_nav";
+    if (ros::param::has(myStrCat(argv[1], param_nav).c_str()))
     {
         ROS_INFO("Esperando que termine la navegacion...");
         bool run;
         do {
-            ros::param::get(myStrCat(argv[1], "/running_door_navigation").c_str(), run);
+            ros::param::get(myStrCat(argv[1], param_nav).c_str(), run);
         } while (run);
     } else {
-        ROS_ERROR("Parametro %s no encontrado.", myStrCat(argv[1], "/running_door_navigation").c_str());
+        ROS_ERROR("Parametro %s no encontrado.", myStrCat(argv[1], param_nav).c_str());
     }
 
     ROS_INFO("Parametro %s indica que se puede generar el modelo de la puerta.", 
-        myStrCat(argv[1], "/running_door_navigation").c_str());
+        myStrCat(argv[1], param_nav).c_str());
     ROS_INFO("Generando modelo...");
 
     /* Generar modelo de la puerta */

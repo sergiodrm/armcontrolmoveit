@@ -95,7 +95,8 @@ private:
     std::queue<sensor_msgs::JointState> jointStatesMsgs;
     std::string planning_group;
     std::string rosNamespace;
-    geometry_msgs::Pose home;
+    geometry_msgs::Pose home_pose;
+    std::vector<double> home_joints;
     moveit::planning_interface::MoveGroupInterface *ptr_move_group;
     moveit::planning_interface::MoveGroupInterface::Plan my_plan;
     VisualTools *vstool;

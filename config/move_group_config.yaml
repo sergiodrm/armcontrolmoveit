@@ -10,4 +10,11 @@ config_arm:
     roll: 0
     pitch: 90
     yaw: 0
+    joint_1: 170
+    joint_2: 310
+    joint_3: -20
+    joint_4: 330
+    joint_5: 0
+    joint_6: 280
+    joint_7: 100
 secure_position_arm: false

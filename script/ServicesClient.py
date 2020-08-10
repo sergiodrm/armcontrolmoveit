@@ -24,16 +24,15 @@ JointValues = [0, 0, 0, 0, 0, 0, 0, 0, 0]
 def clienteSrvHome():
     srvName = "/arm/home_service"
     try:
-        print("Esperando al servicio: %s" % srvName)
+        rospy.loginfo("Esperando al servicio: %s" % srvName)
         rospy.wait_for_service(srvName)
         srv = rospy.ServiceProxy(srvName, HomeService)
         res = srv()
         if not res.errorCode == 0:
-            print("Error en %s. Codigo de error %d" % (srvName, res.errorCode))
-        print(str(res))
+            rospy.logwarn("Error en %s. Codigo de error %d" % (srvName, res.errorCode))
         return res
     except rospy.ServiceException, e:
-        print("Llamada a servicio %s fallida: %s" % (srvName, str(e)))
+        rospy.logerr("Llamada a servicio %s fallida: %s" % (srvName, str(e)))
         res = HomeServiceResponse
         res.success = False
         return res
@@ -42,85 +41,85 @@ def clienteSrvHome():
 def getSupport():
     srvName = "/door/support_position"
     try:
-        print("Esperando al servicio: %s" % srvName)
+        rospy.loginfo("Esperando al servicio: %s" % srvName)
         rospy.wait_for_service(srvName)
-        srv = rospy.ServiceProxy(srvName, PosicionApoyo)
+        srv = rospy.ServiceProxy(srvName, SupportPosition)
         return srv()
     except rospy.ServiceException, e:
-        print("Llamada a servicio %s fallida: %s" % (srvName, str(e)))
+        rospy.logerr("Llamada a servicio %s fallida: %s" % (srvName, str(e)))
         return False
 
 
 def changeTarget(punto):
     srvName = "/arm/change_target"
     try:
-        print("Esperando al servicio: %s" % srvName)
+        rospy.loginfo("Esperando al servicio: %s" % srvName)
         rospy.wait_for_service(srvName)
         srv = rospy.ServiceProxy(srvName, ChangeTarget)
         res = srv(punto)
         if not res.errorCode == 0:
-            print("Error en %s. Codigo de error %d" % (srvName, res.errorCode))
+            rospy.logwarn("Error en %s. Codigo de error %d" % (srvName, res.errorCode))
         return res
     except rospy.ServiceException, e:
-        print("Llamada a servicio %s fallida: %s" % (srvName, str(e)))
-        res = ChangeTargetResponse
-        res.success = False
-        return res
+        rospy.logerr("Llamada a servicio %s fallida: %s" % (srvName, str(e)))
+        # res = ChangeTargetResponse
+        # res.success = False
+        return False
 
 
 def executeTarget():
     srvName = "/arm/execute_target"
     try:
-        print("Esperando al servicio: %s" % srvName)
+        rospy.loginfo("Esperando al servicio: %s" % srvName)
         rospy.wait_for_service(srvName)
         srv = rospy.ServiceProxy(srvName, ExecuteTarget)
         res = srv()
         if not res.errorCode == 0:
-            print("Error en %s. Codigo de error %d" % (srvName, res.errorCode))
+            rospy.logwarn("Error en %s. Codigo de error %d" % (srvName, res.errorCode))
         return res
     except rospy.ServiceException, e:
-        print("Llamada a servicio %s fallida: %s" % (srvName, str(e)))
+        rospy.logerr("Llamada a servicio %s fallida: %s" % (srvName, str(e)))
         res = ExecuteTargetResponse
         res.success = False
         return res
 
 
 def generateTrajectory(type_trajectory):
-    srvName = "/door/generate_system"
+    srvName = "/door/generate_trajectory"
     try:
-        print("Esperando al servicio: %s" % srvName)
+        rospy.loginfo("Esperando al servicio: %s" % srvName)
         rospy.wait_for_service(srvName)
         srv = rospy.ServiceProxy(srvName, GenerateDoorTrajectory)
         return srv(type_trajectory)
     except rospy.ServiceException, e:
-        print("Llamada a servicio %s fallida: %s" % (srvName, str(e)))
+        rospy.logerr("Llamada a servicio %s fallida: %s" % (srvName, str(e)))
     return False
 
 
 def rotateSystem(trans):
     srvName = "/door/rotate_system"
     try:
-        print("Esperando al servicio: %s" % srvName)
+        rospy.loginfo("Esperando al servicio: %s" % srvName)
         rospy.wait_for_service(srvName)
         srv = rospy.ServiceProxy(srvName, RotateSystem)
         return srv(trans)
     except rospy.ServiceException, e:
-        print("Llamada a servicio %s fallida: %s" % (srvName, str(e)))
+        rospy.logerr("Llamada a servicio %s fallida: %s" % (srvName, str(e)))
     return False
 
 
 def planTrajectory(trajectory):
     srvName = "/arm/plan_trajectory"
     try:
-        print("Esperando al servicio: %s" % srvName)
+        rospy.loginfo("Esperando al servicio: %s" % srvName)
         rospy.wait_for_service(srvName)
         srv = rospy.ServiceProxy(srvName, PlanTrajectory)
         res = srv(trajectory)
         if not res.errorCode == 0:
-            print("Error en %s. Codigo de error %d" % (srvName, res.errorCode))
+            rospy.logwarn("Error en %s. Codigo de error %d" % (srvName, res.errorCode))
         return res
     except rospy.ServiceException, e:
-        print("Llamada a servicio %s fallida: %s" % (srvName, str(e)))
+        rospy.logerr("Llamada a servicio %s fallida: %s" % (srvName, str(e)))
         res = PlanTrajectoryResponse
         res.success = False
         return res
@@ -129,60 +128,75 @@ def planTrajectory(trajectory):
 def drawDoorRViz():
     srvName = "/door/drawDoorRViz"
     try:
-        print("Esperando al servicio: %s" % srvName)
+        rospy.loginfo("Esperando al servicio: %s" % srvName)
         rospy.wait_for_service(srvName)
         srv = rospy.ServiceProxy(srvName, DrawDoorRViz)
         return srv()
     except rospy.ServiceException, e:
-        print("Llamada a servicio %s fallida: %s" % (srvName, str(e)))
+        rospy.logerr("Llamada a servicio %s fallida: %s" % (srvName, str(e)))
     return False
 
 def setJointValuesService(req):
     srvName = "/arm/set_joint_values"
     try:
-        print("Esperando al servicio " + srvName)
+        rospy.loginfo("Esperando al servicio " + srvName)
         rospy.wait_for_service(srvName)
         srv = rospy.ServiceProxy(srvName, SetJointValues)
         return srv(req)
     except rospy.ServiceException, e:
-        print("Llamada a servicio %s fallida: %s" % (srvName, str(e)))
+        rospy.logerr("Llamada a servicio %s fallida: %s" % (srvName, str(e)))
     return False
 
 def loadParameter(name, defaultValue):
     if rospy.has_param(name):
         return rospy.get_param(name)
     else:
-        print("Parametro " + name+ " no especificado, valor por defecto: " + str(defaultValue))
+        rospy.logwarn("Parametro " + name+ " no especificado, valor por defecto: " + str(defaultValue))
         return defaultValue
 
 
 def GoToPoint(point, rpy):
-    resChangeTarget = changeTarget(
+    # Infinite loop, again...
+    execution_complete = False
+    while not execution_complete:
+        ## Planificacion de la trayectoria
+        resChangeTarget = changeTarget(
         ChangeTargetRequest(
-            point[0],
-            point[1],
-            point[2],
-            rpy[0],
-            rpy[1],
-            rpy[2],
-            0
+                point[0],
+                point[1],
+                point[2],
+                rpy[0],
+                rpy[1],
+                rpy[2],
+                0
+            )
         )
-    )
-    if not resChangeTarget.success and not resChangeTarget.errorCode == JOINT_DIFF_ERROR:
-        print("Error resChangeTarger.errorCode" + str(resChangeTarget.errorCode))
-        return resChangeTarget.errorCode
-    # Dibujar en RViz
-    if not drawDoorRViz():
-        print("Error drawDoorRViz")
-        pass
-        # return DRAW_DOOR_ERROR
-    raw_input("Pulsar Enter para continuar (crtl+d para salir)...")
-    resExecuteTarget = executeTarget()
-    if not resExecuteTarget.errorCode == SUCCESS:
-        if resExecuteTarget.errorCode == JOINT_DIFF_ERROR:
-            print("Warning! se ha alterado el punto inicial del plan para que coincida con la posicion actual.")
+        ## Comprobar respuesta
+        if type(resChangeTarget) is bool and not resChangeTarget:
+            rospy.logerr('Planificacion fallida')
+            rospy.loginfo('Volviendo a intentar planificacion')
         else:
-            return EXECUTION_ERROR
+            ## Dibujar en RViz
+            if not drawDoorRViz():
+                rospy.logwarn('Error drawDoorRViz (GoToPoint)')
+                pass
+            ## Permiso para disparar
+            raw_input("Pulsar Enter para continuar (crtl+d para salir)...")
+            ## Disparar
+            resExecuteTarget = executeTarget()
+            ## Diana?
+            if not resExecuteTarget.errorCode == SUCCESS and not resExecuteTarget.errorCode == JOINT_DIFF_ERROR:
+                ## Escopetilla de feria
+                rospy.logerr('Error de ejecucion')
+                rospy.logwarn('Volviendo a planificar trayectoria')
+            elif resExecuteTarget.errorCode == JOINT_DIFF_ERROR:
+                ## Por poco
+                rospy.logwarn('Se ha alterado el punto inicial del plan para que coincida con la posicion actual.')
+                execution_complete = True
+            else:
+                ## Rambo
+                rospy.loginfo('Ejecucion completa!')
+                execution_complete = True
     return SUCCESS
 
 ######################################################################
@@ -196,7 +210,7 @@ def TorsoJointTrajectory(position=0, joint='torso_slider_joint'):
     # La llamada a esta funcion asume que cuando siga el hilo de ejecucion
     # el torso ya esta en la posicion deseada, por lo que tiene que comprobar
     # que los motores han dejado de moverse
-    sub = rospy.Subscriber("/rb1/torso_controllers/dynamixel_state", 
+    sub = rospy.Subscriber('/rb1/torso_controllers/dynamixel_state', 
                             dynamixel_workbench_msgs.msg.DynamixelStateList, 
                             TorsoMotionCallback)
     # Para publicar en el topico correspondiente
